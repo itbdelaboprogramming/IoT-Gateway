@@ -8,12 +8,10 @@ It has been tested for:
 
 For first installation, copy the source code (.7z .sh .txt) on directory "/home/$(logname)/" or "~/"
 
-Also make sure that the <APN>,<username>,<password> for the SIM card in the init_dial.txt has been changed accordingly.
-
 Then, do these steps on the terminal:
 
-1) Open terminal, run init_dial.sh
-~$ sudo chmod +x /home/$(logname)/simhat_code/init_dial.sh && sudo sh /home/$(logname)/simhat_code/init_dial.sh
+1) Open terminal, run init_dial.sh, and input the <APN>,<username>,<password> for the SIM card.
+~$ sudo chmod +x simhat_code/init_dial.sh && sudo sh simhat_code/init_dial.sh
 
 3) Close terminal when it is done.
 
@@ -30,12 +28,10 @@ Waveshare SIM7600G-H-M2 4G HATモジュールのインストール手順です�
 
 初回インストール時は、ソースコード（.7z .sh .txt）をディレクトリ「/home/$(logname)/」または「~/」にコピーします。
 
-また、init_dial.txtのSIMカードの<APN>,<username>,<password>が変更されていることを確認してください。
-
 次に、ターミナルで以下の手順を実行します：
 
-1) ターミナルを開き、init_dial.shを実行する。
-~$ sudo chmod +x /home/$(logname)/simhat_code/init_dial.sh && sudo sh /home/$(logname)/simhat_code/init_dial.sh
+1）ターミナルを開き、init_dial.shを実行し、SIMカードの<APN>,<username>,<password>を入力します。
+~$ sudo chmod +x simhat_code/init_dial.sh && sudo sh simhat_code/init_dial.sh
 
 2) 終了したらターミナルを閉じます。
 
