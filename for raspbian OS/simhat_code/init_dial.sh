@@ -94,7 +94,7 @@ sleep 1
 sudo apt install cron
 sudo systemctl enable cron
 # Check whether the command line is already exist in /etc/crontab
-if ! sudo grep -q "sudo sh /home/$(logname)/simhat_code/dial.sh &" /etc/crontab; then
+if ! sudo grep -q "@reboot root sudo sh /home/$(logname)/simhat_code/dial.sh &" /etc/crontab; then
     # Append the file into /etc/crontab to enable automatic run after reboot 
     sudo su -c "echo \"@reboot root sudo sh /home/$(logname)/simhat_code/dial.sh &\" >> /etc/crontab"
     # install 'Remote.it' desktop app for remote access
