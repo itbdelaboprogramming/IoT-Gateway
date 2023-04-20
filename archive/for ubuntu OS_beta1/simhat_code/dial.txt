@@ -1,4 +1,0 @@
-sleep 1
-send "AT$QCRMCALL=1,1\r"
-sleep 2
-! killall -9 minicom
