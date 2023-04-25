@@ -15,7 +15,7 @@ It has been tested for:
     - RaspberryPi 3B+/4
     - OS Raspbian Buster (legacy) and Ubuntu 18 Mate (arm)
 
-For remote access functionality, follow the instruction on "my.zerotier.com" for creating a virtual LAN
+For remote access functionality, follow the instruction on "www.zerotier.com" for creating a virtual LAN
 
 For first installation, after the SIM Hat (hardware) module is installed, power up the RaspberryPi and
 copy the folder "simhat_code" to directory "/home/$(logname)/" or "~/"
@@ -48,7 +48,7 @@ Waveshare SIM7600G-H-M2 4G HATモジュールのインストール手順です�
     - RaspberryPi 3B+/4
     - OS Raspbian Buster (legacy) and Ubuntu 18 Mate (arm)
 
-リモートアクセス機能については、「my.zerotier.com」での仮想LANの作成方法に従ってください。
+リモートアクセス機能については、「www.zerotier.com」での仮想LANの作成方法に従ってください。
 
 初回インストール時は、SIMハット（ハードウェア）モジュールを初めてインストールしたら、RaspberryPiの電源を入れ、
 「simhat_code」フォルダを「/home/$（logname）/」または「~/」ディレクトリにコピーしてください。

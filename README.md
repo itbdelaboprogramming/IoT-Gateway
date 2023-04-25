@@ -8,7 +8,7 @@ It has been tested for:
 * RaspberryPi 3B+/4
 * OS Raspbian Buster (legacy) and Ubuntu 18 Mate (arm)
 
-For remote access functionality, follow the instruction on [ZeroTier One](my.zerotier.com) for creating a virtual LAN.
+For remote access functionality, follow the instruction on [ZeroTier](https://www.zerotier.com/) for creating a virtual LAN.
 
 ## Installation
 For first installation, after the SIM Hat (hardware) module is installed, power up the RaspberryPi and copy the folder 'simhat_code' to directory '/home/$(logname)/' or '~/'
@@ -38,7 +38,7 @@ boot
 4. The boot sequence should continue. You can unplug the monitor and keyboard when the boot-up finished.
 
 ## 設置方法
-リモートアクセス機能については、[ZeroTier One](my.zerotier.com) での仮想LANの作成方法に従ってください。
+リモートアクセス機能については、[ZeroTier](https://www.zerotier.com/) での仮想LANの作成方法に従ってください。
 
 初回インストール時は、SIMハット（ハードウェア）モジュールを初めてインストールしたら、RaspberryPiの電源を入れ、'simhat_code' フォルダを '/home/$(logname)/' または'~/' ディレクトリにコピーしてください。
 
