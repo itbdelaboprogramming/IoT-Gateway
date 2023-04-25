@@ -31,9 +31,9 @@ To solve this issue, do these steps:
 2. When the boot stops, you should be in U-boot terminal. Press enter.
 3. type these commands:
 ```
-    setenv bootdelay -2
-    saveenv
-    boot
+setenv bootdelay -2
+saveenv
+boot
 ```
 4. The boot sequence should continue. You can unplug the monitor and keyboard when the boot-up finished.
 
