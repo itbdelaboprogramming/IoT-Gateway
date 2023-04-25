@@ -5,8 +5,8 @@ The Raspberry-Pi can also be used as a router (internet gateway) for other devic
 
 This is the installation procedure for Waveshare SIM7600G-H-M2 4G HAT module.
 It has been tested for:
-    * RaspberryPi 3B+/4
-    * OS Raspbian Buster (legacy) and Ubuntu 18 Mate (arm)
+* RaspberryPi 3B+/4
+* OS Raspbian Buster (legacy) and Ubuntu 18 Mate (arm)
 
 For remote access functionality, follow the instruction on [ZeroTier One](my.zerotier.com) for creating a virtual LAN.
 
@@ -15,9 +15,9 @@ For first installation, after the SIM Hat (hardware) module is installed, power 
 
 Then, do these steps on the terminal:
 1. Open terminal, run init_dial.bash, and input the <APN>,<username>,<password> for the SIM card.
-'''
+```
 sudo bash simhat_code/init_dial.bash
-'''
+```
 2. Follow the instructions on the terminal.
 3. Close terminal when it is done.
 
@@ -30,11 +30,11 @@ To solve this issue, do these steps:
 1. Plug monitor and keyboard onto the Raspberry Pi the power it up
 2. When the boot stops, you should be in U-boot terminal. Press enter.
 3. type these commands:
-'''
-setenv bootdelay -2
-saveenv
-boot
-'''
+```
+    setenv bootdelay -2
+    saveenv
+    boot
+```
 4. The boot sequence should continue. You can unplug the monitor and keyboard when the boot-up finished.
 
 ## 設置方法
@@ -44,9 +44,9 @@ boot
 
 次に、ターミナルで以下の手順を実行します：
 1. ターミナルを開き、init_dial.bash を実行し、SIMカードの<APN>,<username>,<password>を入力します。
-'''
+```
 sudo bash simhat_code/init_dial.bash
-'''
+```
 2. 端末の指示に従う。
 3. 終了したらターミナルを閉じます。
 
@@ -60,9 +60,9 @@ SIM Hatモジュールがブートシーケンスを中断している可能性�
 1. モニターとキーボードをRaspberry Piに接続し、電源を投入します。
 2. 起動が止まったら、U-bootのターミナルになります。エンターキーを押してください。
 3. 以下のコマンドを入力します：
-'''
+```
 setenv bootdelay -2
 saveenv
 boot
-'''
+```
 4. ブートシーケンスが継続するはずです。起動が終了したら、モニターとキーボードを取り外してください。
