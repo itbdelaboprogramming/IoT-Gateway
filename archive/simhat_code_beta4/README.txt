@@ -26,7 +26,7 @@ Then, do these steps on the terminal:
 2) Follow the instructions on the terminal.
 3) Close terminal when it is done.
 
-After this, the RaspberryPi will automatically use SIM Card to access the internet when when Wi-Fi is not available.
+After this, the RaspberryPi will automatically use SIM Card to access the internet when when WI-Fi is not available.
 
 *Notes:
 If the RaspberryPi does not complete its boot-up after the SIM Hat (hardware) module is installed,
@@ -59,7 +59,7 @@ Waveshare SIM7600G-H-M2 4G HATモジュールのインストール手順です�
 2) 端末の指示に従う。
 3) 終了したらターミナルを閉じます。
 
-これで、Wi-Fiが使えないときに、raspberry Piが自動的にSIMカードを使ってインターネットにアクセスするようになります。
+これで、WI-Fiが使えないときに、raspberry Piが自動的にSIMカードを使ってインターネットにアクセスするようになります。
 
 *注釈
 SIM Hat（ハードウェア）モジュールを装着した後、RaspberryPiが起動を完了しない場合、

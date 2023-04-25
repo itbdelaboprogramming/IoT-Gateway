@@ -17,6 +17,7 @@ echo ""
 
 # Enable execute (run program) privilege for all related files
 sudo chmod +x /home/$(logname)/simhat_code/dial.py
+sudo chmod +x /home/$(logname)/simhat_code/dial.bash
 sudo chmod +x /home/$(logname)/simhat_code/route.bash
 sudo chmod +x /etc/crontab
 
@@ -31,7 +32,6 @@ sudo apt install raspberrypi-kernel-headers -y
 # udhcpc package for connecting to the internet
 sudo apt install udhcpc -y
 # 'zerotier' for virtual LAN and remote access
-sudo apt install net-tools -y
 sudo apt install curl -y
 curl -s https://install.zerotier.com | sudo bash
 # cron for task automation
@@ -40,16 +40,15 @@ sudo apt install cron -y
 ## Configure remote access
 echo ""
 echo "This machine needs to join ZeroTier network to enable remote access"
-read -p "Please input the ZeroTier Network ID: " zt_net_id
+read -p "Please input the ZeroTier Network ID: " net_id
 # Join the ZeroTier network
-sudo zerotier-cli join $zt_net_id
+sudo zerotier-cli join $net_id
 echo ""
 echo "Please input the ZeroTier Network's LAN managed route  " 
-read -p "(ex: 192.168.200.0/23): " zt_net_route
-zt_net_route=$(echo "$zt_net_route" | awk -F"." '{print $1"."$2"."$3}')
+read -p "(ex: 192.168.200.0/23): " net_route
+zt_man_route=$(echo "$net_route" | sed 's/\/[0-9]\{1,\}/\/24/')
 echo ""
 echo "Please authorize this machine in the [my.zerotier.com] network settings"
-echo ""
 
 #=================================================
 # CONNECTING TO THE INTERNET
@@ -65,26 +64,17 @@ sudo su -c "cd /home/$(logname)/simhat_code && 7z x SIM7600_NDIS.7z   -r -o./SIM
 sudo > /home/$(logname)/simhat_code/dial.bash
 sudo cat <<endoffile >> /home/$(logname)/simhat_code/dial.bash
 #!/bin/bash
-echo ""
+
 # Ping the Google DNS server to check internet connectivity
 if ! sudo ping -q -c 1 -W 1 8.8.8.8 >/dev/null; then
-echo "NO INTERNET"
+sudo echo "NO INTERNET"
 # Run internet dial sequence
 sudo python3 /home/$(logname)/simhat_code/dial.py $(logname)
 fi
 
-# Count the number of hosts in a subnet (ZeroTier's network)
-host_count=0
-for host in {1..254}; do
-host_ip="$zt_net_route.\$host"
-if ! arp -n \$host_ip | grep -q "no entry"; then
-host_count=\$((host_count+1))
-fi
-done
-echo ""
-# Restart ZeroTier service if no hosts are up (ZeroTier's network)
-if ! [ \$host_count -gt 0 ]; then
-echo "NO REMOTE ACCESS"
+# Check if the number of hosts up is greater than 1
+if ! [ \$(nmap -sP $zt_man_route | grep "Host is up" | wc -l) -gt 1 ]; then
+sudo echo "NO REMOTE ACCESS"
 # Stop virtual LAN service
 sudo service zerotier-one stop && sudo systemctl stop zerotier-one
 # Start virtual LAN service
@@ -93,7 +83,6 @@ fi
 exit 0
 endoffile
 # Run dial.bash to configure internet data call
-sudo chmod +x /home/$(logname)/simhat_code/dial.bash
 sudo bash /home/$(logname)/simhat_code/dial.bash
 
 ## Configure automatic run for every reboot
@@ -122,11 +111,6 @@ done
 
 if [[ "$router" == "y" || "$router" == "Y" ]]; then
 echo ""
-# Install packages for 'router' operation and debugging
-sudo apt install nmap dnsmasq iptables iptables-persistent -y
-
-# Input 'router' subnet address
-echo ""
 echo "Your Raspberry Pi will manage local network (ethernet) route 192.168.xxx.0/24"
 echo "with subnet xxx being between the value 2-254"
 echo "and different with other Raspberry Pi routers in ZeroTier network"
@@ -138,18 +122,9 @@ sudo bash /home/$(logname)/simhat_code/route.bash $subnet
 # Write RaspberyPi's subnet-dependent command in dial.bash
 sudo su -c "sed -i '/.*exit.*/d' /home/$(logname)/simhat_code/dial.bash"
 echo -e "
-# Count the number of hosts in a subnet (RasPi-as-Router LAN's network)
-host_count=0
-for host in {1..254}; do
-host_ip=\"192.168.$subnet.\$host\"
-if ! arp -n \$host_ip | grep -q \"no entry\"; then
-host_count=\$((host_count+1))
-fi
-done
-echo \"\"
-# Run route.bash if no hosts are up (RasPi-as-Router LAN's network)
-if ! [ \$host_count -gt 1 ]; then
-echo \"NO ROUTING FUNCTION\"
+# Also run routing sequence if ethernet interface is down
+if ! [ \$(nmap -sP 192.168.$subnet.0/24 | grep "Host is up" | wc -l) -gt 1 ]; then
+sudo echo \"NO ROUTING FUNCTION\"
 sudo bash /home/$(logname)/simhat_code/route.bash $subnet
 fi
 exit 0" | sudo tee -a /home/$(logname)/simhat_code/dial.bash &> /dev/null

@@ -20,6 +20,10 @@ eth=$(ip -o link show | awk -F': ' '{print $2}' | grep -v lo | grep -i eth)
 wwan=$(ip -o link show | awk -F': ' '{print $2}' | grep -v lo | grep -i wwan)
 zt=$(ip -o link show | awk -F': ' '{print $2}' | grep -v lo | grep -i zt)
 
+# packages for 'router' operation and debugging
+sudo apt install nmap dnsmasq iptables iptables-persistent -y
+echo ""
+
 #=================================================
 # IPTABLES SET UP
 
