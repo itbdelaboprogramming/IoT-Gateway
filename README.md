@@ -1,7 +1,7 @@
 # IoT-Gateway
 Development of IoT gateway system for internet communication by using Raspberry-Pi.
 
-The Raspberry-Pi can also be used as a router (internet gateway) for other device that is connectted through the ethernet port.
+The Raspberry-Pi can also be used as a router (internet gateway) for other device that is connected through the ethernet port.
 
 This is the installation procedure for Waveshare SIM7600G-H-M2 4G HAT module.
 It has been tested for:
@@ -11,10 +11,10 @@ It has been tested for:
 For remote access functionality, follow the instruction on [ZeroTier](https://www.zerotier.com/) for creating a virtual LAN.
 
 ## Installation
-For first installation, after the SIM Hat (hardware) module is installed, power up the RaspberryPi and copy the folder 'simhat_code' to directory '/home/$(logname)/' or '~/'
+For first installation, after the SIM Hat (hardware) module is installed, power up the RaspberryPi and copy the folder `simhat_code` to directory `/home/$(logname)/` or `~/`
 
 Then, do these steps on the terminal:
-1. Open terminal, run init_dial.bash, and input the <APN>,<username>,<password> for the SIM card.
+1. Open terminal, run `init_dial.bash`, and input the APN, username, password for the SIM card.
 ```
 sudo bash simhat_code/init_dial.bash
 ```
@@ -40,10 +40,10 @@ boot
 ## 設置方法
 リモートアクセス機能については、[ZeroTier](https://www.zerotier.com/) での仮想LANの作成方法に従ってください。
 
-初回インストール時は、SIMハット（ハードウェア）モジュールを初めてインストールしたら、RaspberryPiの電源を入れ、'simhat_code' フォルダを '/home/$(logname)/' または'~/' ディレクトリにコピーしてください。
+初回インストール時は、SIMハット（ハードウェア）モジュールを初めてインストールしたら、RaspberryPiの電源を入れ、`simhat_code` フォルダを `/home/$(logname)/` または `~/` ディレクトリにコピーしてください。
 
 次に、ターミナルで以下の手順を実行します：
-1. ターミナルを開き、init_dial.bash を実行し、SIMカードの<APN>,<username>,<password>を入力します。
+1. ターミナルを開き、`init_dial.bash` を実行し、SIMカードの APN, username, password を入力します。
 ```
 sudo bash simhat_code/init_dial.bash
 ```
