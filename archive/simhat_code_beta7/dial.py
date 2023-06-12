@@ -2,10 +2,10 @@
 #title           :dial.py
 #description     :AT command configuration script, used through dial.bash file
 #author          :Nicholas Putra Rihandoko
-#date            :2023/06/12
-#version         :1.1
+#date            :2023/04/25
+#version         :3.1
 #usage           :Iot Gateway
-#notes           :
+#notes           :take a look at README.txt for further info
 #python_version  :3.7.3
 #==============================================================================
 """
@@ -17,7 +17,6 @@ import sys
 import os
 import time
 import serial
-import subprocess
 
 # Connect through serial communication to the SIM Card
 path = os.path.dirname(os.path.abspath(__file__))
@@ -68,24 +67,14 @@ else:
     
     # Enable mobile data connection interface
     os.system('sudo ifconfig wwan0 up && sudo ip link set up wwan0')
-
+    
     # Run AT command in dial.txt through minicom to setup start Internet Data Call
     send_at('AT$QCRMCALL=1,1','OK',2)
     
-    try:
-        last = True        
-        # Obtain public address to connect to the internet
-        subprocess.run('sudo udhcpc -i wwan0', shell=True, timeout=5, check=True)
+    # Obtain public address to connect to the internet
+    os.system('sudo udhcpc -i wwan0')
     
-    except subprocess.TimeoutExpired:
-        print("Internet connection via NDIS failed.")
-        print("")
-        last = False
-    
-    if last:
-        # Fix DNS error if happened
-        os.system('sudo route add -net 0.0.0.0 wwan0 > /dev/null 2>&1')
-    else:
-        print("ERROR")
+    # Fix DNS error if happened
+    os.system('sudo route add -net 0.0.0.0 wwan0 &> /dev/null')
 
 sim.close()

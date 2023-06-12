@@ -2,24 +2,17 @@
 #title           :init_dial.bash
 #description     :SIMHAT module installation script (main)
 #author          :Nicholas Putra Rihandoko
-#date            :2023/06/12
+#date            :2023/04/20
 #version         :1.1
 #usage           :Iot Gateway
-#notes           :
+#notes           :take a look at README.txt for further info
 #==============================================================================
 
 echo ""
 echo "Please input the SIM card's APN information"
-echo "Press 'Enter' for empty Username or Password"
-echo ""
 read -p "SIM Card APN: " sim_apn
 read -p "SIM Card Username: " sim_user
 read -p "SIM Card Password: " sim_pass
-echo ""
-echo "Starting SIM Card configuration..."
-echo ""
-echo "Press 'ctrl + C' to cancel"
-sleep 2
 echo ""
 
 # Enable execute (run program) privilege for all related files
@@ -48,41 +41,19 @@ sudo apt install cron -y
 ## Configure remote access
 echo ""
 echo "This machine needs to join ZeroTier network to enable remote access"
-read -p "Please input the ZeroTier Network_ID: " zt_net_id
+read -p "Please input the ZeroTier Network ID: " zt_net_id
 # Join the ZeroTier network
 sudo zerotier-cli join $zt_net_id
 echo ""
-
-while IFS= read -r line; do
-# Function to extract the "/24" routes from a comma-separated list
-extract_route() {
-IFS=',' read -ra values <<< "$1"
-for value in "${values[@]}"; do
-if [[ $value == */24 ]]; then
-echo "$value"
-return
-fi
-done
-}
-# Check if the line contains 'zt' and '/24'
-if [[ $line =~ zt ]]; then
-    # Extract the 'zt' and route using awk
-zt_iface=$(echo "$line" | awk '{print $8}')
-zt_net_route=$(extract_route "$(echo "$line" | awk '{print $9}')")
-fi
-done <<< "$(sudo zerotier-cli listnetworks)"
-
-# Check if IP address for this device was found in the ZeroTier Network
-if [[ -z $zt_net_route ]]; then
-echo "No corresponding ZeroTier network found in this device"
-echo "Please authorize this machine in the ZeroTier Central network settings [my.zerotier.com], then retry."
-echo "Installation is not completed. Exiting..."
-echo ""
-exit 1
-fi
+echo "Please input the ZeroTier Network's LAN managed route  " 
+read -p "(ex: 192.168.200.0/23): " zt_net_route
 zt_net_route=$(echo "$zt_net_route" | awk -F"." '{print $1"."$2"."$3}')
 echo ""
-
+# initiate network in ZeroTier Virtual LAN
+sudo nmap -F $zt_net_route.0/24
+echo ""
+echo "Please authorize this machine in the [my.zerotier.com] network settings"
+echo ""
 
 #=================================================
 # CONNECTING TO THE INTERNET
@@ -110,7 +81,7 @@ fi
 
 echo ""
 # Restart ZeroTier service if no hosts are up (ZeroTier's network)
-if ! [ \$(sudo nmap -sP $zt_net_route.0/24 | grep "Host is up" | wc -l) -gt 1 ]; then
+if ! [ \$(nmap -sP $zt_net_route.0/24 | grep "Host is up" | wc -l) -gt 1 ]; then
 echo "NO REMOTE ACCESS"
 # Stop virtual LAN service
 sudo service zerotier-one stop && sudo systemctl stop zerotier-one
@@ -119,17 +90,9 @@ sudo service zerotier-one start && sudo systemctl start zerotier-one
 fi
 exit 0
 endoffile
+# Run dial.bash to configure internet data call
 sudo chmod +x /home/$(logname)/simhat_code/dial.bash
-
-# Run dial.py to initialize internet data call
-lease=$(sudo python3 /home/$(logname)/simhat_code/dial.py lease | tail -1)
-if [[ "$lease" == "ERROR" ]]; then
-echo ""
-echo "SIM Hat system installation incomplete"
-echo "Exiting..."
-echo ""
-exit 0
-fi
+sudo bash /home/$(logname)/simhat_code/dial.bash
 
 ## Configure automatic run for every reboot
 # Enable Cron to automate task
@@ -140,7 +103,7 @@ line='*/2 * * * * root sudo bash /home/$(logname)/simhat_code/dial.bash >> /home
 sudo su -c "sed -i '/.*simhat_code.*/d' /etc/crontab"
 sudo su -c "echo \"$line\" >> /etc/crontab"
 # Restart cron service
-sudo service cron restart
+sudo service cron restart && sudo systemctl restart cron
 
 #=================================================
 # RASPBERRY PI AS ROUTER
@@ -158,48 +121,36 @@ done
 if [[ "$router" == "y" || "$router" == "Y" ]]; then
 echo ""
 # Install packages for 'router' operation and debugging
-sudo apt install dnsmasq iptables iptables-persistent -y
+sudo apt install dnsmasq iptables iptables-persistent netfilter-persistent -y
 
 # Input 'router' subnet address
 echo ""
-echo "Your Raspberry Pi will manage local network (ethernet) route 172.21.xxx.0/24"
+echo "Your Raspberry Pi will manage local network (ethernet) route 192.168.xxx.0/24"
 echo "with subnet xxx being between the value 2-254"
 echo "and different with other Raspberry Pi routers in ZeroTier network"
 read -p "Type in the value of subnet xxx: " subnet
 
 # Run route.bash to configure routing operation
-sudo bash /home/$(logname)/simhat_code/route.bash $zt_iface $subnet
+sudo bash /home/$(logname)/simhat_code/route.bash $subnet
 
 # Write RaspberyPi's subnet-dependent command in dial.bash
 sudo su -c "sed -i '/.*exit.*/d' /home/$(logname)/simhat_code/dial.bash"
 echo -e "
 echo \"\"
 # Run route.bash if no hosts are up (RasPi-as-Router LAN's network)
-if ! [ \$(sudo nmap -sP 172.21.$subnet.0/24 | grep \"Host is up\" | wc -l) -gt 1 ]; then
+if ! [ \$(nmap -sP 192.168.$subnet.0/24 | grep "Host is up" | wc -l) -gt 1 ]; then
 echo \"NO ROUTING FUNCTION\"
-sudo bash /home/$(logname)/simhat_code/route.bash $zt_iface $subnet
+sudo bash /home/$(logname)/simhat_code/route.bash $subnet
 fi
 exit 0" | sudo tee -a /home/$(logname)/simhat_code/dial.bash &> /dev/null
 
 echo ""
 echo "=========================================================="
 echo "Installation of Raspberry Pi Router system is finished"
-echo "The LAN's default gateway is 172.21.$subnet.1"
-echo "with Subnet Mask 255.255.255.0 and DNS Server 8.8.8.8 (Google)"
+echo "The LAN's default gateway is 192.168.$subnet.1"
+echo "with Subnet Mask 255.255.255.0"
+echo "and DNS Server 8.8.8.8 (Google)"
 echo "for up to 20 devices"
-
-echo "----------------------------------------------------------"
-echo "Follow these steps to route between ZeroTier network"
-echo " and this machine's local network (ethernet)"
-echo ""
-echo "Open my.zerotier.com/network/\$NETWORK_ID"
-echo "Go to Settings -> Advanced -> Managed Routes"
-echo "Fill in the \"Add Routes\" parameters:"
-echo "Destination = 172.21.$subnet.0/23"
-echo "Via = 172.21.$subnet.1"
-echo "Click \"Submit\""
-echo "Go to Members, search for this machine's address ($(echo "$(sudo zerotier-cli info)" | awk '{print $3}'))"
-echo "On the \"Managed IPs\" column, add IP address: 172.21.$subnet.1"
 
 elif [[ "$router" == "n" || "$router" == "N" ]]; then
 echo ""

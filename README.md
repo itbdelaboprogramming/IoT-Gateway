@@ -3,10 +3,10 @@ Development of IoT gateway system for internet communication by using Raspberry-
 
 The Raspberry-Pi can also be used as a router (internet gateway) for other device that is connected through the ethernet port.
 
-This is the installation procedure for Waveshare SIM7600G-H-M2 4G HAT module.
+This is the installation procedure for Waveshare SIM7600G-H 4G HAT module.
 It has been tested for:
-* RaspberryPi 3B+/4
-* OS Raspbian Buster (legacy) and Ubuntu 18 Mate (arm)
+* RaspberryPi 3B+/4/Zero W2,
+* OS Raspbian Buster (legacy), Raspbian Lite 32 bit, Ubuntu 18 Mate (arm)
 
 For remote access functionality, follow the instruction on [ZeroTier](https://www.zerotier.com/) for creating a virtual LAN.
 

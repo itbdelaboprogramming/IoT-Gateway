@@ -2,23 +2,23 @@
 #title           :route.bash
 #description     :RPi as router configuration script, used through init_dial.bash file
 #author          :Nicholas Putra Rihandoko
-#date            :2023/06/12
+#date            :2023/04/20
 #version         :1.1
 #usage           :Iot Gateway
-#notes           :
+#notes           :take a look at README.txt for further info
 #==============================================================================
 
 echo ""
-ip_address="172.21.$2.1"
+ip_address="192.168.$1.1"
 netmask="255.255.255.0"
-rpi_man_route="172.21.$2.0/24"
+rpi_man_route="192.168.$1.0/24"
 dhcp_range_start=$(echo $ip_address | sed 's/\.[0-9]*$/\.2/')
 dhcp_range_end=$(echo $ip_address | sed 's/\.[0-9]*$/\.21/')
 dhcp_time="24h"
 dns_server="8.8.8.8"
 eth=$(ip -o link show | awk -F': ' '{print $2}' | grep -v lo | grep -i eth)
 wwan=$(ip -o link show | awk -F': ' '{print $2}' | grep -v lo | grep -i wwan)
-zt=$1
+zt=$(ip -o link show | awk -F': ' '{print $2}' | grep -v lo | grep -i zt)
 
 #=================================================
 # IPTABLES SET UP
