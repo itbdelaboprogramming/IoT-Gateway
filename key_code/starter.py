@@ -2,8 +2,8 @@
 #title           :starter.py
 #description     :IoT key feature scheduling script, used to start the main scripts on scheduled interval
 #author          :Nicholas Putra Rihandoko
-#date            :2023/06/12
-#version         :1.1
+#date            :2023/06/21
+#version         :1.2
 #usage           :Iot Gateway
 #notes           :
 #python_version  :3.7.3
@@ -34,10 +34,14 @@ def starter():
         os.system('python3 {}/{} start'.format(os.path.dirname(os.path.abspath(__file__)),'auth.py'))
         os.system('python3 {}/{} stop'.format(os.path.dirname(os.path.abspath(__file__)),'auth.py'))
         os.system('python3 {}/{} monitor &'.format(os.path.dirname(os.path.abspath(__file__)),'auth.py'))
+
+        # If you want to skip the authentication process, comment the three lines above, then uncomment this line bellow
+        #os.system('python3 {}/{} run'.format(os.path.dirname(os.path.abspath(__file__)),'src/jobs.py'))
+
         print("Successfully run the script.")
         print("")
 
 
 starter()
-# Run backup procedure
-os.system('python3 {}/{}'.format(os.path.dirname(os.path.abspath(__file__)),'backup.py'))
+# Run backup procedure, uncomment if needed
+#os.system('python3 {}/{}'.format(os.path.dirname(os.path.abspath(__file__)),'backup.py'))

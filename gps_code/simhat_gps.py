@@ -2,8 +2,8 @@
 #title           :simhat_gps.py
 #description     :Main script to obtain GPS data
 #author          :Nicholas Putra Rihandoko
-#date            :2023/06/12
-#version         :0.1
+#date            :2023/06/21
+#version         :0.2
 #usage           :Iot Gateway
 #notes           :take a look at README.txt for further info
 #python_version  :3.7.3
@@ -31,9 +31,9 @@ class gnss:
         self._ser.flushInput()
         print('Start GPS session...')
 
-        # Disable then enable SIM Hat's GNSS feature
-        self.send_at('AT+CGPS=0','OK',1)
-        time.sleep(2)
+        # Enable SIM Hat's GNSS feature
+        #self.send_at('AT+CGPS=0','OK',1)
+        #time.sleep(2)
         self.send_at('AT+CGPS=1','OK',1)
         time.sleep(2)
 
@@ -46,14 +46,10 @@ class gnss:
             # Calculate Latitude and Longitude
             Lat = round(float(gps_data[0][:-9])+(float(gps_data[0][-9:])/60),8)
             Long = round(float(gps_data[2][:-9])+(float(gps_data[2][-9:])/60),8)
-            if gps_data[1] == 'N':
-                self.Latitude = Lat
-            else:
-                self.Latitude = -Lat
-            if gps_data[3] == 'E':
-                self.Longitude = Long
-            else:
-                self.Longitude = -Long
+            if gps_data[1] == 'N': self.Latitude = Lat
+            else: self.Latitude = -Lat
+            if gps_data[3] == 'E': self.Longitude = Long
+            else: self.Longitude = -Long
         else:
             self.status = "GPS Signal Lost"
 

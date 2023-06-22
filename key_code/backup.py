@@ -2,8 +2,8 @@
 #title           :backup.py
 #description     :IoT key feature data logging/backup script, used to backup csv data from other brograms
 #author          :Nicholas Putra Rihandoko
-#date            :2023/06/12
-#version         :1.1
+#date            :2023/06/21
+#version         :1.2
 #usage           :Iot Gateway
 #notes           :
 #python_version  :3.7.3
@@ -40,7 +40,7 @@ def copy_csv_files(source_dir, destination_dir):
         shutil.copy(source_path, destination_path)
 
 def compress_backup():
-    # Compress the folder to a ZIP file
+    # Compress the folder to a ZIP file with password
     with open(keyword_path, 'r') as file:
         password = file.read()
     output_path = zip_path

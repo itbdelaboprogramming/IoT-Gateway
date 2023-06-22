@@ -2,8 +2,8 @@
 #title           :dial.py
 #description     :AT command configuration script, used through dial.bash file
 #author          :Nicholas Putra Rihandoko
-#date            :2023/06/12
-#version         :1.1
+#date            :2023/06/21
+#version         :1.2
 #usage           :Iot Gateway
 #notes           :
 #python_version  :3.7.3
@@ -61,31 +61,27 @@ else:
     os.system('sudo su -c "rmmod qmi_wwan && rmmod simcom_wwan && rmmod simcom_wwan.ko &> /dev/null"')
     
     # Run make files to compile SIM Hat driver
-    os.system('sudo su -c "cd {}/SIM7600_NDIS && make clean && make"'.format(path))
+    os.system('sudo su -c "cd {}/SIM7600_NDIS && make clean && make &> /dev/null"'.format(path))
     
     # Install the Simcom SIM card driver (it will be automatically removed during every reboot)
     os.system('sudo su -c "cd {}/SIM7600_NDIS && insmod simcom_wwan.ko &> /dev/null"'.format(path))
     
     # Enable mobile data connection interface
     os.system('sudo ifconfig wwan0 up && sudo ip link set up wwan0')
+    time.sleep(3)
 
     # Run AT command in dial.txt through minicom to setup start Internet Data Call
     send_at('AT$QCRMCALL=1,1','OK',2)
+    time.sleep(3)
     
     try:
         last = True        
         # Obtain public address to connect to the internet
-        subprocess.run('sudo udhcpc -i wwan0', shell=True, timeout=5, check=True)
+        subprocess.run('sudo udhcpc -i wwan0', shell=True, timeout=6, check=True)
+        os.system('sudo route add -net 0.0.0.0 wwan0 > /dev/null 2>&1')
     
     except subprocess.TimeoutExpired:
         print("Internet connection via NDIS failed.")
         print("")
-        last = False
-    
-    if last:
-        # Fix DNS error if happened
-        os.system('sudo route add -net 0.0.0.0 wwan0 > /dev/null 2>&1')
-    else:
-        print("ERROR")
 
 sim.close()

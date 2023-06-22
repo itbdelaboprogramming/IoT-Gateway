@@ -2,15 +2,11 @@
 #title           :init_auth.bash
 #description     :IoT USB Key feature installation script
 #author          :Nicholas Putra Rihandoko
-#date            :2023/06/12
-#version         :1.1
+#date            :2023/06/21
+#version         :1.2
 #usage           :Iot Gateway
 #notes           :
 #==============================================================================
-
-echo "Please input the new password for IoT USB Key feature"
-read -p "password: " new_password
-echo ""
 
 ## Configure IoT USB Key feature
 # Enable execute (run program) privilege for all related files
@@ -18,17 +14,37 @@ sudo chmod +x /home/$(logname)/key_code/starter.py
 sudo chmod +x /home/$(logname)/key_code/backup.py
 sudo chmod +x /home/$(logname)/key_code/auth.py
 sudo chmod +x /home/$(logname)/key_code/src/jobs.py
-sudo chmod +x /home/$(logname)/key_code/src/get_usb
+sudo chmod +x /home/$(logname)/key_code/src/get_usb.bash
 sudo chmod +x /etc/crontab
 
-# Install necessary packages:
+## Create the dependency files
+# File paths to create
+file_paths=(
+"/home/$(logname)/key_code/src/jobs.txt"
+"/home/$(logname)/key_code/src/status.txt"
+"/home/$(logname)/key_code/src/encryptor.txt"
+"/home/$(logname)/key_code/src/keyword.txt"
+"/home/$(logname)/key_code/iot_key.txt"
+)
+# Loop through the list of file paths
+for file_path in "${file_paths[@]}"; do
+# Check if the file already exists
+if [ ! -e "$file_path" ]; then
+# Create the file
+echo "" > "$file_path"
+fi
+# Set the permissions
+chmod 777 "$file_path"
+done
+
+## Install necessary packages:
 sudo apt install python3-pip
 sudo pip3 install pyudev
 sudo pip3 install psutil
 sudo pip3 install cryptography
 sudo pip3 install pyzipper
 
-# Run auth.py to configure keyword
+## Run auth.py to configure keyword
 sudo python3 /home/$(logname)/key_code/auth.py generate
 
 ## Configure automatic run for every reboot
@@ -44,5 +60,5 @@ sudo service cron restart && sudo systemctl restart cron
 sleep 1
 echo "Installation of IoT USB Key system is completed"
 echo ""
-python3 /home/$(logname)/key_code/auth.py monitor &
+python3 /home/$(logname)/key_code/starter.py &
 exit

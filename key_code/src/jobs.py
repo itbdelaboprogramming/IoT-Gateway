@@ -2,8 +2,8 @@
 #title           :jobs.py
 #description     :IoT key's lists of script to be monitored
 #author          :Nicholas Putra Rihandoko
-#date            :2023/06/12
-#version         :1.1
+#date            :2023/06/21
+#version         :1.2
 #usage           :Iot Gateway
 #notes           :
 #python_version  :3.7.3
@@ -29,15 +29,15 @@ def run():
             jobs = line.rstrip().decode().split(' ')
             pid = None
             for process in psutil.process_iter(['pid', 'name']):
-                if process.info['name'] == jobs[0] and jobs[2] in ' '.join(process.cmdline()):
+                if process.info['name'] == jobs[0] and os.path.basename(jobs[1]) in ' '.join(process.cmdline()):
                     pid = process.info['pid']
                     print(process.info)
                     break
-            # If the process ID (PID) was found, terminate the process
+            # If the process ID (PID) was not found, run the process
             if pid:
                 print("The script is already running.")
             else:
-                os.system('{} {}/{} &'.format(jobs[0],jobs[1],jobs[2]))
+                os.system('{} {} &'.format(jobs[0],jobs[1]))
                 print("Successfully run the script.")
                 print("")
 
@@ -49,7 +49,7 @@ def kill():
             jobs = line.rstrip().decode().split(' ')
             pid = None
             for process in psutil.process_iter(['pid', 'name']):
-                if process.info['name'] == jobs[0] and jobs[2] in ' '.join(process.cmdline()):
+                if process.info['name'] == jobs[0] and os.path.basename(jobs[1]) in ' '.join(process.cmdline()):
                     pid = process.info['pid']
                     break
 
@@ -60,8 +60,10 @@ def kill():
             else:
                 print("The script is not running.")
                 print("")
-
-if sys.argv[1] == "run":
-    run()
-elif sys.argv[1] == "kill":
-    kill()
+try:
+    if sys.argv[1] == "run":
+        run()
+    elif sys.argv[1] == "kill":
+        kill()
+except:
+    pass

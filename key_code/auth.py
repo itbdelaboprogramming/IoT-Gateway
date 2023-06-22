@@ -2,8 +2,8 @@
 #title           :auth.py
 #description     :IoT key feature main script, used for USB authentification
 #author          :Nicholas Putra Rihandoko
-#date            :2023/06/12
-#version         :1.1
+#date            :2023/06/21
+#version         :1.2
 #usage           :Iot Gateway
 #notes           :
 #python_version  :3.7.3
@@ -178,19 +178,32 @@ def iot_stop():
 
 def add_jobs():
     dir = path()
-    with open(dir.jobs_path, 'w') as file:
-        file.write(sys.argv[2])
+    print("Enter the command-line parameters")
+    print("Only two arguments (interpreter & script's absolute directory)")
+    print("Ex: python3 /directory/to/your_script.py")
+    print("")
+    interpreter = input("Interpreter: ")
+    script = input("Script: ")
+    with open(dir.jobs_path, 'a') as file:
+        file.write(interpreter)
         file.write(" ")
-        file.write(sys.argv[3])
-        file.write(" ")
-        file.write(sys.argv[4])
+        file.write(script)
         file.write("\n")
+    print("")
+    print("Job added on the list")
 
 def list_jobs():
     dir = path()
     with open(dir.jobs_path, 'r') as file:
         for line in file:
             print(line.rstrip().split(' '))
+
+def reset_jobs():
+    dir = path()
+    with open(dir.jobs_path, 'w') as file:
+        file.write("")
+
+##=================== Script Functions Based on Input Argument ===================##
 
 if sys.argv[1] == "monitor":
     # Create a context for monitoring
@@ -233,9 +246,11 @@ elif sys.argv[1] == "generate":
 elif sys.argv[1] == "check":
     dir = path()
     if dir.usb_path != "/media/pi/devicenotfound":
+        # read the encryption key in the machine
         with open(dir.encryptor_path, 'rb') as file:
             key = file.read().decode()
         try:
+            # decrypt and print the keyword in the USB
             decrypt_file(dir.file_path, key)
             print("The IoT keyword saved inside the USB is:")
             with open(dir.file_path, 'rb') as file:
@@ -260,6 +275,9 @@ elif sys.argv[1] == "add_jobs":
 
 elif sys.argv[1] == "list_jobs":
     list_jobs()
+
+elif sys.argv[1] == "reset_jobs":
+    reset_jobs()
     
 else:
     pass
