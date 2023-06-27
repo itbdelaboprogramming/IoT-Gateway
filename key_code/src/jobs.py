@@ -18,7 +18,7 @@ import sys
 import psutil
 import subprocess
 
-# Specify the path to the USB drive and the filename
+# Specify the path to the job list
 jobs_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),'jobs.txt')
 
 def run():
@@ -35,11 +35,11 @@ def run():
                     break
             # If the process ID (PID) was not found, run the process
             if pid:
-                print("The script is already running.")
+                print("The job {} is already running.".format(os.path.basename(jobs[1])))
             else:
                 os.system('{} {} &'.format(jobs[0],jobs[1]))
-                print("Successfully run the script.")
-                print("")
+                print("Successfully run the job: {}".format(os.path.basename(jobs[1])))
+            print("")
 
 def kill():
     print("")
@@ -56,10 +56,10 @@ def kill():
              # If the process ID (PID) was found, terminate the process
             if pid:
                 subprocess.run(['sudo', 'kill', str(pid)])
-                print("Successfully kill the script.")
+                print("Successfully kill the job: {}".format(os.path.basename(jobs[1])))
             else:
-                print("The script is not running.")
-                print("")
+                print("The job {} is not running.".format(os.path.basename(jobs[1])))
+            print("")
 try:
     if sys.argv[1] == "run":
         run()

@@ -73,6 +73,8 @@ def copy_to_usb():
             usb_path = os.popen('bash {}/get_usb.bash'.format(backup_path)).read().strip()
             shutil.copy(zip_path, usb_path)        
 
+##=================== =================== Backup Routine =================== ===================##
+
 try:
     compile_all_csv()
 except:

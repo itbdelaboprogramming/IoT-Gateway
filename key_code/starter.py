@@ -16,7 +16,14 @@
 import os
 import psutil
 
-def starter():
+def kill_starter(pid):
+    if pid == None:
+        print('The script auth.py is currently not running')
+    else:
+        os.system('sudo kill {}'.format(pid))
+        print('Successfully kill auth.py script')
+
+def main_starter():
     pid = None
     # Find the process ID (PID) of the python script
     for process in psutil.process_iter(['pid', 'name']):
@@ -24,24 +31,32 @@ def starter():
             pid = process.info['pid']
             break
 
-    # If the process ID (PID) was found, terminate the process
+    # To stop the auth.py script, uncomment this line below
+    #kill_starter(pid); return
+
+    # If the process ID (PID) of auth.py was not found, run the script
     if pid:
+        print("The script auth.py is already running.")
         print(process.info)
-        #os.system('sudo kill {}'.format(pid))
-        pass
-    else:
-        # If not, excute the script
+
+        # Check whether the jobs are already running
         os.system('python3 {}/{} start'.format(os.path.dirname(os.path.abspath(__file__)),'auth.py'))
         os.system('python3 {}/{} stop'.format(os.path.dirname(os.path.abspath(__file__)),'auth.py'))
+
+    else:
+        # If auth.py is not already running, execute the script
         os.system('python3 {}/{} monitor &'.format(os.path.dirname(os.path.abspath(__file__)),'auth.py'))
 
-        # If you want to skip the authentication process, comment the three lines above, then uncomment this line bellow
-        #os.system('python3 {}/{} run'.format(os.path.dirname(os.path.abspath(__file__)),'src/jobs.py'))
+        print("Successfully run auth.py script.")
+    print("")
+    return pid
 
-        print("Successfully run the script.")
-        print("")
+##=================== =================== Starter Routine =================== ===================##
 
+main_starter()
 
-starter()
+# If you want to skip the authentication process, comment the line 'main_starter()', then uncomment this line bellow
+#os.system('python3 {}/{} run'.format(os.path.dirname(os.path.abspath(__file__)),'src/jobs.py'))
+
 # Run backup procedure, uncomment if needed
 #os.system('python3 {}/{}'.format(os.path.dirname(os.path.abspath(__file__)),'backup.py'))

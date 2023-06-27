@@ -74,6 +74,9 @@ def create_key(iot_keyword):
             print("Using existing keyword in", dir.keyword_path)
 
     if create_new[0]:
+        print("Type your new keyword:")
+        iot_keyword = input('')
+        print("")
         # Create the text file and write the keyword to it
         with open(dir.keyword_path, 'wb') as file:
             file.write(iot_keyword.encode())
@@ -107,6 +110,7 @@ def create_key(iot_keyword):
     os.system('sudo cp -rf {} {} > /dev/null 2>&1'.format(dir.iot_key_path, dir.file_path))
     print("")
     print("The USB has been configured as IoT Key for this machine")
+    print("Password for zipfile: ".format(iot_keyword))
     print("")
     
 def iot_start():
@@ -216,6 +220,8 @@ if sys.argv[1] == "monitor":
     # Monitor for USB drive events
     print("USB key monitoring service is now running ...")
     print("")
+    iot_start()
+    iot_stop()
     for action, device in monitor:
         try:
             time.sleep(3)
@@ -232,9 +238,7 @@ if sys.argv[1] == "monitor":
 elif sys.argv[1] == "generate":
     dir = path()
     if dir.usb_path != "/media/pi/devicenotfound":
-        print("Type your new keyword:")
-        new_key = input('')
-        create_key(new_key)
+        create_key()
     else:
         print("Key generation is incomplete.")
         print("Please add an empty file named \"iot_key.txt\"")
