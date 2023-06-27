@@ -9,6 +9,72 @@
 #==============================================================================
 
 echo ""
+echo "Starting SIM Hat System installation..."
+echo ""
+echo "Press 'ctrl + C' to cancel"
+sleep 2
+
+while true; do
+echo ""
+read -p "Will this machine act as a Router? (y/n) " yn_router
+case $yn_router in
+[Yy]*)
+while true; do
+echo ""
+read -p "Do you want to configure the SIM card first? (y/n): " yn_skip
+case $yn_skip in
+[Yy]*)
+echo ""
+echo "OK"
+break;;
+[Nn]*)
+echo ""
+echo "OK"
+break;;
+*)
+echo ""
+echo "Invalid input. Please answer 'y' or 'n'.";;
+esac
+done
+break;;
+
+[Nn]*)
+echo ""
+echo "OK"
+yn_skip="n"
+break;;
+*)
+echo ""
+echo "Invalid input. Please answer 'y' or 'n'.";;
+esac
+done
+
+# Write RaspberyPi's username-dependent command in dial.bash
+sudo > /home/$(logname)/simhat_code/dial.bash
+sudo cat <<endoffile >> /home/$(logname)/simhat_code/dial.bash
+#!/bin/bash
+echo ""
+date +"%Y-%m-%d %H:%M:%S"
+echo ""
+# Ping the Google DNS server to check internet connectivity
+if ! sudo ping -q -c 1 -W 1 8.8.8.8 >/dev/null; then
+echo "NO INTERNET"
+# Run internet dial sequence
+sudo python3 /home/$(logname)/simhat_code/dial.py lease
+fi
+exit 0
+endoffile
+
+# Enable execute (run program) privilege for all related files
+sudo chmod +x /home/$(logname)/simhat_code/dial.bash
+sudo chmod +x /home/$(logname)/simhat_code/dial.py
+sudo chmod +x /home/$(logname)/simhat_code/route.bash
+sudo chmod +x /etc/crontab
+
+# --------- this is the start of SIM Card config IF CONDITIONAL
+if [[ "$yn_skip" == "y" || "$yn_skip" == "Y" ]]; then
+echo "Continuing with SIM Card configuration..."
+echo ""
 echo "Please input the SIM card's APN information"
 echo "Press 'Enter' for empty Username or Password"
 echo ""
@@ -16,16 +82,6 @@ read -p "SIM Card APN: " sim_apn
 read -p "SIM Card Username: " sim_user
 read -p "SIM Card Password: " sim_pass
 echo ""
-echo "Starting SIM Card configuration..."
-echo ""
-echo "Press 'ctrl + C' to cancel"
-sleep 2
-echo ""
-
-# Enable execute (run program) privilege for all related files
-sudo chmod +x /home/$(logname)/simhat_code/dial.py
-sudo chmod +x /home/$(logname)/simhat_code/route.bash
-sudo chmod +x /etc/crontab
 
 ## Install necessary packages:
 # minicom and pyserial for AT command debugging and programming
@@ -53,40 +109,58 @@ while true; do
 read -p "Do you want to configure it now? (y/n): " yn_zerotier
 case $yn_zerotier in
 [Yy]*)
+while true; do
+echo ""
 read -p "Please input the ZeroTier Network_ID: " zt_net_id
 sudo zerotier-cli join $zt_net_id
+sleep 2
+if sudo zerotier-cli listnetworks | grep -q "$zt_net_id"; then
+break
+else
 echo ""
+echo "Please try again."
+fi
+done
 
 while true; do
 read -p "Do you want this machine to join another ZeroTier network? (y/n): " yn_zerotier
 case $yn_zerotier in
 [Yy]*)
+while true; do
+echo ""
 read -p "Please input the ZeroTier Network_ID: " zt_net_id
 sudo zerotier-cli join $zt_net_id
-echo "";;
+sleep 2
+if sudo zerotier-cli listnetworks | grep -q "$zt_net_id"; then
+break
+else
+echo ""
+echo "Please try again."
+fi
+done;;
 [Nn]*)
-echo "OK, continuing."
+echo ""
+echo "OK."
 break;;
 *)
+echo ""
 echo "Invalid input. Please answer 'y' or 'n'.";;
 esac
 done
 break;;
 
 [Nn]*)
-echo "OK, continuing."
+echo ""
+echo "OK."
 break;;
 *)
+echo ""
 echo "Invalid input. Please answer 'y' or 'n'.";;
 esac
 done
 echo ""
-echo "Here is your machine's ZeroTier network information:"
-sudo zerotier-cli listnetworks
-echo ""
-echo "Please authorize this machine in the ZeroTier Central network settings [my.zerotier.com]."
-echo ""
 echo "Continuing with SIM Card and internet configuration..."
+echo ""
 
 #=================================================
 # CONNECTING TO THE INTERNET
@@ -98,22 +172,6 @@ sudo python3 /home/$(logname)/simhat_code/dial.py config $sim_apn $sim_user $sim
 ## Configure internet access
 # Extract the zip file (.7z)
 sudo su -c "cd /home/$(logname)/simhat_code && 7z x SIM7600_NDIS.7z   -r -o./SIM7600_NDIS -y"
-# Write RaspberyPi's username-dependent command in dial.bash
-sudo > /home/$(logname)/simhat_code/dial.bash
-sudo cat <<endoffile >> /home/$(logname)/simhat_code/dial.bash
-#!/bin/bash
-echo ""
-date +"%Y-%m-%d %H:%M:%S"
-echo ""
-# Ping the Google DNS server to check internet connectivity
-if ! sudo ping -q -c 1 -W 1 8.8.8.8 >/dev/null; then
-echo "NO INTERNET"
-# Run internet dial sequence
-sudo python3 /home/$(logname)/simhat_code/dial.py lease
-fi
-exit 0
-endoffile
-sudo chmod +x /home/$(logname)/simhat_code/dial.bash
 
 # Run dial.py to initialize internet data call
 lease=$(sudo python3 /home/$(logname)/simhat_code/dial.py lease | tail -1)
@@ -124,6 +182,8 @@ echo "Exiting..."
 echo ""
 exit 0
 fi
+
+fi # --------- this is the end of SIM Card config IF CONDITIONAL
 
 ## Configure automatic run for every reboot
 # Enable Cron to automate task
@@ -140,13 +200,31 @@ sudo service cron restart
 # RASPBERRY PI AS ROUTER
 
 while true; do
-echo ""
-read -p "Will this machine act as a router? (y/n): " yn_router
 case $yn_router in
-[Yy]*) 
+[Yy]*)
+echo ""
+echo "Continuing with Router function configuration..."
 echo ""
 # Install packages for 'router' operation and debugging
 sudo apt install dnsmasq iptables iptables-persistent -y
+
+# Input ZeroTier interface
+while true; do
+echo ""
+echo "Here is your machine's ZeroTier network information:"
+sudo zerotier-cli listnetworks
+echo ""
+echo "Type in the ZerotTier interface of the network that you want to route from the information above"
+read -p " it should be in the format zt********* from the <dev> section: " zt_iface
+if sudo zerotier-cli listnetworks | grep -q "$zt_iface"; then
+echo ""
+echo "OK"
+break
+else
+echo ""
+echo "Interface not found. Please try again."
+fi
+done
 
 # Input 'router' subnet address
 echo ""
@@ -186,14 +264,14 @@ echo "Fill in the \"Add Routes\" parameters:"
 echo "Destination = 172.21.$subnet.0/23"
 echo "Via = 172.21.$subnet.1"
 echo "Click \"Submit\""
-echo "Go to Members, search for this machine's address ($(echo "$(sudo zerotier-cli info)" | awk '{print $3}'))"
+echo "Go to Members, search for this machine's ZeroTier address"
 echo "On the \"Managed IPs\" column, add IP address: 172.21.$subnet.1"
 break;;
 
 [Nn]*) 
 echo ""
 echo "=========================================================="
-echo "Installation of SIMHAT system is finished"
+echo "Installation of SIM Hat system (SIM Card configuration) is finished"
 break;;
 
 *)
@@ -202,7 +280,10 @@ esac
 done
 
 echo ""
-echo "Please reboot the RaspberryPi"
+echo "This machine's ZeroTier address is $(echo "$(sudo zerotier-cli info)" | awk '{print $3}')"
+echo "Please authorize this machine in the ZeroTier Central network settings [my.zerotier.com]."
+echo ""
+echo "Also, please reboot the RaspberryPi"
 echo "=========================================================="
 echo ""
 exit 0
