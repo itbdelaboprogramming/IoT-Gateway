@@ -17,7 +17,7 @@ import serial
 import time
 import os
 
-class gnss:
+class node:
     def __init__(self):
         # Intialize variables
         self.Latitude = None

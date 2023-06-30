@@ -12,16 +12,15 @@ echo ""
 echo "Starting SIM Hat System installation..."
 echo ""
 echo "Press 'ctrl + C' to cancel"
-sleep 2
 
 while true; do
 echo ""
-read -p "Will this machine act as a Router? (y/n) " yn_router
+read -p "Will this machine act as a Router? (Y/n) " yn_router
 case $yn_router in
 [Yy]*)
 while true; do
 echo ""
-read -p "Do you want to configure the SIM card first? (y/n): " yn_skip
+read -p "Do you want to configure the SIM card first? (Y/n): " yn_skip
 case $yn_skip in
 [Yy]*)
 echo ""
@@ -49,6 +48,12 @@ echo "Invalid input. Please answer 'y' or 'n'.";;
 esac
 done
 
+# Enable execute (run program) privilege for all related files
+sudo chmod +x /home/$(logname)/simhat_code/dial.bash
+sudo chmod +x /home/$(logname)/simhat_code/dial.py
+sudo chmod +x /home/$(logname)/simhat_code/route.bash
+sudo chmod +x /etc/crontab
+
 # Write RaspberyPi's username-dependent command in dial.bash
 sudo > /home/$(logname)/simhat_code/dial.bash
 sudo cat <<endoffile >> /home/$(logname)/simhat_code/dial.bash
@@ -65,11 +70,13 @@ fi
 exit 0
 endoffile
 
-# Enable execute (run program) privilege for all related files
-sudo chmod +x /home/$(logname)/simhat_code/dial.bash
-sudo chmod +x /home/$(logname)/simhat_code/dial.py
-sudo chmod +x /home/$(logname)/simhat_code/route.bash
-sudo chmod +x /etc/crontab
+# Create cron command to check connection every 2 minutes, stars dial.bash if there is no internet
+line='*/2 * * * * root sudo bash /home/$(logname)/simhat_code/dial.bash >> /home/$(logname)/simhat_code/dial.log 2>&1'
+# Check whether the command line already exists in /etc/crontab, add or uncomment it if it does not
+sudo su -c "sed -i '/.*simhat_code.*/d' /etc/crontab"
+sudo su -c "echo \"$line\" >> /etc/crontab"
+# Restart cron service
+sudo service cron restart
 
 # --------- this is the start of SIM Card config IF CONDITIONAL
 if [[ "$yn_skip" == "y" || "$yn_skip" == "Y" ]]; then
@@ -100,13 +107,18 @@ sudo apt install curl -y
 curl -s https://install.zerotier.com | sudo bash
 # cron for task automation
 sudo apt install cron -y
+sudo systemctl enable cron
+# ssh and VNC for remote access
+sudo systemctl enable ssh
+sudo systemctl start ssh
+sudo raspi-config nonint do_vnc 0
 
 ## Configure remote access
 # Join the ZeroTier network
 echo ""
 echo "This machine needs to join ZeroTier network to enable remote access"
 while true; do
-read -p "Do you want to configure it now? (y/n): " yn_zerotier
+read -p "Do you want to configure it now? (Y/n): " yn_zerotier
 case $yn_zerotier in
 [Yy]*)
 while true; do
@@ -123,7 +135,7 @@ fi
 done
 
 while true; do
-read -p "Do you want this machine to join another ZeroTier network? (y/n): " yn_zerotier
+read -p "Do you want this machine to join another ZeroTier network? (Y/n): " yn_zerotier
 case $yn_zerotier in
 [Yy]*)
 while true; do
@@ -185,17 +197,6 @@ fi
 
 fi # --------- this is the end of SIM Card config IF CONDITIONAL
 
-## Configure automatic run for every reboot
-# Enable Cron to automate task
-sudo systemctl enable cron
-# Create cron command to check connection every 2 minutes, stars dial.bash if there is no internet
-line='*/2 * * * * root sudo bash /home/$(logname)/simhat_code/dial.bash >> /home/$(logname)/simhat_code/dial.log 2>&1'
-# Check whether the command line already exists in /etc/crontab, add or uncomment it if it does not
-sudo su -c "sed -i '/.*simhat_code.*/d' /etc/crontab"
-sudo su -c "echo \"$line\" >> /etc/crontab"
-# Restart cron service
-sudo service cron restart
-
 #=================================================
 # RASPBERRY PI AS ROUTER
 
@@ -206,7 +207,7 @@ echo ""
 echo "Continuing with Router function configuration..."
 echo ""
 # Install packages for 'router' operation and debugging
-sudo apt install dnsmasq iptables iptables-persistent -y
+sudo apt install dnsmasq iptables iptables-persistent tcpdump -y
 
 # Input ZeroTier interface
 while true; do
@@ -283,7 +284,7 @@ echo ""
 echo "This machine's ZeroTier address is $(echo "$(sudo zerotier-cli info)" | awk '{print $3}')"
 echo "Please authorize this machine in the ZeroTier Central network settings [my.zerotier.com]."
 echo ""
-echo "Also, please reboot the RaspberryPi"
+echo "Also, please reboot the RaspberryPi, just in case :)"
 echo "=========================================================="
 echo ""
 exit 0

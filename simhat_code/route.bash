@@ -51,12 +51,16 @@ sudo iptables -t nat -A POSTROUTING -o $eth -j MASQUERADE
 # Allow forwarding of network traffic from eth to zt and vice versa if the network traffic is part of existing connections or sessions
 sudo iptables -A FORWARD -i $eth -o $zt -m state --state RELATED,ESTABLISHED -j ACCEPT
 sudo iptables -A FORWARD -i $zt -o $eth -j ACCEPT
-# Allow traffic to and from UDP port 9993 for ZeroTier virtual LAN communication
+# Allow traffic to and from TCP and UDP port 9993 for ZeroTier virtual LAN communication
 sudo iptables -A INPUT -p udp --dport 9993 -j ACCEPT
 sudo iptables -A OUTPUT -p udp --dport 9993 -j ACCEPT
+sudo iptables -A FORWARD -p udp --dport 9993 -j ACCEPT
+sudo iptables -A INPUT -p tcp --dport 9993 -j ACCEPT
+sudo iptables -A OUTPUT -p tcp --dport 9993 -j ACCEPT
+sudo iptables -A FORWARD -p tcp --dport 9993 -j ACCEPT
 
 # Save iptables rules for next boot using iptables-persistent
-sudo iptables-save > /etc/iptables/rules.v4
+sudo su -c  "iptables-save > /etc/iptables/rules.v4"
 
 #=================================================
 # DNSMASQ SET UP
