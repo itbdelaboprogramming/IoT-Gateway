@@ -91,6 +91,7 @@ read -p "SIM Card Password: " sim_pass
 echo ""
 
 ## Install necessary packages:
+sudo apt update
 # minicom and pyserial for AT command debugging and programming
 sudo apt install minicom python3-pip -y
 sudo pip3 install pyserial

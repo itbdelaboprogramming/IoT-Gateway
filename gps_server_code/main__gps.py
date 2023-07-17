@@ -14,8 +14,8 @@
 import datetime
 import time
 import query
-from lib import SIM7600_GNSS as gnss
-#from lib import SE100_GNSS as gnss
+#from lib import SIM7600_GNSS as gnss
+from lib import SE100_GNSS as gnss
 import socketio
 import json
 
@@ -27,17 +27,18 @@ mysql_server    = {"host":"10.4.171.204",
                     "table":"diff_gps",
                     "port":3306}
 mysql_timeout   = 3 # the maximum time this device will wait for completing MySQl query (in seconds)
+mysql_interval = 60 # Seconds, used to maintain table row size
 interval = 1    # Seconds
 error_delay = 3 # Seconds
 
 # Define SocketIO  parameters
-sio_server = "http://10.4.171.198:3000"
+sio_server = "http://localhost:3000"
 sio_payload = {"id": 0,
                 "data": {
-                    "latitude": None,
-                    "longitude": None,
+                    "latitude": 33.2108277,
+                    "longitude": 130.0459166,
                     "status": "GPS Not Ready",
-                    "vehicle-name": "Car A"
+                    "vehicle-name": "Base Station"
                 }}
 
 # Monitor Modbus communication for debugging
@@ -58,7 +59,7 @@ def disconnect():
 while init:
     try:
         gps = gnss.node(sio_payload["data"]["vehicle-name"])
-        sio.connect(sio_server)
+        #sio.connect(sio_server)
         print("<===== GPS Initialized =====>")
         print("")
         init = False
@@ -70,31 +71,24 @@ while init:
         print("")
         time.sleep(3)
 
-first = True
+start = datetime.datetime.now()
 # Reading a Modbus message and Upload to database sequence
 while not init:          
     # Send the command to read the measured value
     gps.read_gps()
     timer = datetime.datetime.now()
 
-    # Calculate differential correction
-    latest_query = ("SELECT diff_lat, diff_lon, num_sats, hdop, lat, lon FROM {} ORDER BY id DESC LIMIT 1".format(mysql_server["table"]))
-    latest_data = query.dgps_correction(mysql_server,latest_query,gps)
-    rtc_query = ("SELECT diff_lat, diff_lon, num_sats, hdop, lat, lon FROM {} WHERE RTC = '{}' ORDER BY id DESC LIMIT 1".format(mysql_server["table"],gps.RTC.strftime("%H:%M:%S")))
-    rtc_data = query.dgps_correction(mysql_server,rtc_query,gps)
+    # Define MySQL queries and data which will be used in the program
+    title = ["rtc","lat","lon","diff_lat","diff_lon","num_sats","hdop"]
+    update_query = ("INSERT INTO `{}` ({}) VALUES ({})".format(mysql_server["table"],
+                                                                ",".join(title),
+                                                                ",".join(['%s' for _ in range(len(title))])))
+    data = [gps.RTC.strftime("%H:%M:%S"), gps.Latitude, gps.Longitude,
+            sio_payload["data"]["latitude"] - gps.Latitude, sio_payload["data"]["longitude"] - gps.Longitude,
+            gps.Count_Satellites, gps.HDOP]
+    query.print_response([gps],datetime.datetime.now())
+    query.connect_mysql(mysql_server,update_query,data,mysql_timeout)
 
-    # Save data to csv for analysis
-    title = ["time","raw_lat","raw_lon","num_sats","hdop",
-                "latest_lat","latest_lon","latest_sats_diff","latest_hdop_diff",
-                "rtc_lat","rtc_lon","rtc_sats_diff","rtc_hdop_diff",
-                "ref_raw_lat_latest", "ref_raw_lon_latest", "ref_raw_lat_rtc","ref_raw_lon_rtc"]
-    data = [timer.strftime("%Y-%m-%d %H:%M:%S"), gps.Latitude, gps.Longitude, gps.Count_Satellites, gps.HDOP,
-            latest_data[0],latest_data[1],latest_data[2],latest_data[3],
-            rtc_data[0],rtc_data[1],rtc_data[2],rtc_data[3],
-            latest_data[4],latest_data[5],rtc_data[4],rtc_data[5]]
-    query.log_in_csv(title, data, timer, 'log_gps.csv')
-    query.print_response([gps],timer)
-        
     # Send to the Socket.IO server
     try:
         sio_payload["data"]["latitude"] = gps.Latitude
@@ -103,13 +97,21 @@ while not init:
         #sio.emit("gps",json.dumps(sio_payload))
 
         # REF = 33.2108277, 130.0459166
-        gpsloc = {"latitude" : latest_data[0], "longitude" : latest_data[1]}
+        gpsloc = {"latitude" : gps.Latitude, "longitude" : gps.Longitude}
         gpshead = {"heading" : 300}
-        sio.emit("location",json.dumps(gpsloc))
-        sio.emit("heading",json.dumps(gpshead))
+        #sio.emit("location",json.dumps(gpsloc))
+        #sio.emit("heading",json.dumps(gpshead))
     except Exception as e:
         # Handle incoming events or perform other operations
         print(f'Error connecting to Socket.IO server: {e}')
         time.sleep(error_delay)
+
+    # Maintain table row size so that it is not too big
+    if (timer - start).total_seconds() > mysql_interval:
+        start = timer
+        limit_query = ("DELETE FROM {} WHERE id NOT IN ( SELECT id FROM ( "
+                       "SELECT id FROM {} ORDER BY id DESC LIMIT %s ) AS limited_rows )".format(
+                           mysql_server["table"],mysql_server["table"]))
+        query.connect_mysql(mysql_server,limit_query,[50],mysql_timeout)
 
     time.sleep(interval)

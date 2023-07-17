@@ -30,14 +30,12 @@ def send_at(command,expect,wait):
     sim.write((command + '\r\n').encode())
     time.sleep(wait)
     if sim.inWaiting():
-        rec_buff = sim.read(sim.inWaiting())
-    if expect not in rec_buff.decode():
+        rec_buff = sim.read(sim.inWaiting()).decode()
+    if expect not in rec_buff:
         print('command ' + command + ' failed')
-        print('unexpected response:\t' + rec_buff.decode())
-        return 0
+        print('unexpected response:\t' + rec_buff)
     else:
-        print(rec_buff.decode())
-        return 1
+        print(rec_buff)
 
 if sys.argv[1] == "config":
     # Reset SIM Card configuration to default settings

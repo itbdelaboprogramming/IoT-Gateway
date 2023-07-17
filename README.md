@@ -27,7 +27,7 @@ After this, the RaspberryPi will automatically use SIM Card to access the intern
 If the RaspberryPi does not complete its boot-up after the SIM Hat (hardware) module is installed, the SIM Hat module may have interrupted the boot sequence. 
 
 To solve this issue, do these steps:
-1. Plug monitor and keyboard onto the Raspberry Pi the power it up
+1. Plug monitor and keyboard onto the Raspberry Pi then power it up
 2. When the boot stops, you should be in U-boot terminal. Press enter.
 3. type these commands:
 ```

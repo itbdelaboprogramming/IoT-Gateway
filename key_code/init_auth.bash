@@ -38,6 +38,7 @@ chmod 777 "$file_path"
 done
 
 ## Install necessary packages:
+sudo apt update
 sudo apt install python3-pip
 sudo pip3 install pyudev
 sudo pip3 install psutil
