@@ -61,7 +61,6 @@ echo ""
 read -p "Input the number --> " gps_model
 case $gps_model in
 [1]*)
-sudo python3 /home/$(logname)/gps_code/gnss.py SIM7600
 sudo > /home/$(logname)/gps_code/lib/get_usb.bash
 sudo cat <<endoffile >> /home/$(logname)/gps_code/lib/get_usb.bash
 #!/bin/bash
@@ -78,6 +77,7 @@ else
 echo ""
 fi
 endoffile
+sudo python3 /home/$(logname)/gps_server_code/gnss.py $gps_model
 break;;
 
 [2]*)
