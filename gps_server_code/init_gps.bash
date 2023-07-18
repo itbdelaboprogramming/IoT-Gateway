@@ -98,7 +98,7 @@ echo ""
 echo "Choose the SE100 communication media"
 echo "Available configuration:"
 echo "1) UART (Tx-Rx) pinout"
-echo "2) USB-to-TTL"
+echo "2) USB-to-TTL converter"
 echo "3) ~ others"
 echo ""
 read -p "Input the number --> " se100_com

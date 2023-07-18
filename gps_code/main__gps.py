@@ -20,7 +20,7 @@ import socketio
 import json
 
 # Define MySQL Database parameters
-mysql_server    = {"host":"10.4.171.54",
+mysql_server    = {"host":"10.4.171.204",
                     "user":"pi",
                     "password":"raspberrypi",
                     "db":"test",
