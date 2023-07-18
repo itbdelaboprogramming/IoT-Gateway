@@ -27,6 +27,10 @@ sudo raspi-config nonint do_serial 1
 sudo raspi-config nonint do_serial 2
 # Disable/comment bluetooth over serial port
 sed -i 's/^dtoverlay=pi-minuart-bt/#&/g' /boot/config.txt
+# ssh and VNC for remote access
+sudo systemctl enable ssh
+sudo systemctl start ssh
+sudo raspi-config nonint do_vnc 0
 
 # Enable execute (run program) privilege for all related files
 sudo chmod +x /home/$(logname)/gps_server_code/main__gps.py
@@ -50,6 +54,12 @@ npm init -y
 npm i socket.io@4.7.1 express@4.18.2 morgan@1.10.0 dotenv@16.3.1
 npm audit fix
 npm update engine.io ws
+# 'zerotier' for virtual LAN and remote access
+sudo apt install curl nmap -y
+curl -s https://install.zerotier.com | sudo bash
+# cron for task automation
+sudo apt install cron -y
+sudo systemctl enable cron
 
 # Start GPS module configuration
 while true; do

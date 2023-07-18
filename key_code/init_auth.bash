@@ -45,12 +45,21 @@ sudo pip3 install psutil
 sudo pip3 install cryptography
 sudo pip3 install pyzipper
 
+# 'zerotier' for virtual LAN and remote access
+sudo apt install curl nmap -y
+curl -s https://install.zerotier.com | sudo bash
+# cron for task automation
+sudo apt install cron -y
+sudo systemctl enable cron
+# ssh and VNC for remote access
+sudo systemctl enable ssh
+sudo systemctl start ssh
+sudo raspi-config nonint do_vnc 0
+
 ## Run auth.py to configure keyword
 sudo python3 /home/$(logname)/key_code/auth.py generate
 
 ## Configure automatic run for every reboot
-# Enable Cron to automate task
-sudo systemctl enable cron
 # Create cron command to check connection every 2 minutes, stars dial.bash if there is no internet
 line='*/2 * * * * root python3 /home/$(logname)/key_code/starter.py & >> /home/$(logname)/key_code/src/starter.log 2>&1'
 # Check whether the command line already exists in /etc/crontab, add or uncomment it if it does not
