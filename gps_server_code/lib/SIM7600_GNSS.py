@@ -67,15 +67,16 @@ class node:
             # Read AT Command's responses
             while True:
                 line = self._ser.readline().decode()
-                if '+CGNSSINFO: ,,,,,' in line:
-                    # EXAMPLE LOST SIGNAL: '+CGNSSINFO: ,,,,,,,,,,,,,,,'
-                    self.Status = "GPS Signal Lost"
-                    break
-                elif '+CGNSSINFO: ' in line:
-                    # Parse the from NMEA format to object's attributes
-                    data = line.replace('+CGNSSINFO: ',"").strip().split(',')
-                    self.gps_decode(data)
-                    break
+                if '+CGNSSINFO: ' in line:
+                    if ',,,,' in line:
+                        # EXAMPLE LOST SIGNAL: '+CGNSSINFO: ,,,,,,,,,,,,,,,'
+                        self.Status = "GPS Signal Lost"
+                        break
+                    else:
+                        # Parse the from NMEA format to object's attributes
+                        data = line.replace('+CGNSSINFO: ',"").strip().split(',')
+                        self.gps_decode(data)
+                        break
             signal.alarm(0)
             print(self.Status)
         except Exception as e:
