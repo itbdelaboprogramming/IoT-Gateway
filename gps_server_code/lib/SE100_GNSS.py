@@ -74,9 +74,11 @@ class node:
                     self.gps_decode(data)
                     break
             signal.alarm(0)
-        except:
+            print(self.Status)
+        except Exception as e:
             # Print the error message
             print("problem with GPS :")
+            print(e)
             print("<===== ===== continuing ===== =====>")
             print("")
             # Disconnected

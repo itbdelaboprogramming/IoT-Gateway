@@ -64,19 +64,22 @@ class node:
                 # Decode the data from GPS SE100 NMEA serial communication
                 line = self._ser.readline().decode('utf-8', errors='replace')
                 # Select the $GNGGA only
-                if '$GNGGA,,,,,' in line:
-                    # EXAMPLE LOST SIGNAL: '$GNGGA,,,,,,0,00,99.99,,,,,,*56'
-                    self.Status = "GPS Signal Lost"
-                    break
-                elif '$GNGGA,{}'.format(datetime.datetime.utcnow().strftime("%H%M%S")) in line:
-                    # Parse the from NMEA format to object's attributes
-                    data = str(line).replace('$GNGGA,',"").strip().split(',')
-                    self.gps_decode(data)
-                    break
+                if '$GNGGA,' in line:
+                    if ',,,,' in line:
+                        # EXAMPLE LOST SIGNAL: '$GNGGA,,,,,,0,00,99.99,,,,,,*56'
+                        self.Status = "GPS Signal Lost"
+                        break
+                    elif datetime.datetime.utcnow().strftime("%H%M%S") in line:
+                        # Parse the from NMEA format to object's attributes
+                        data = str(line).replace('$GNGGA,',"").strip().split(',')
+                        self.gps_decode(data)
+                        break
             signal.alarm(0)
-        except:
+            print(self.Status)
+        except Exception as e:
             # Print the error message
             print("problem with GPS :")
+            print(e)
             print("<===== ===== continuing ===== =====>")
             print("")
             # Disconnected

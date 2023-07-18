@@ -31,32 +31,35 @@ def limit_db_rows(mysql_server,row_limit,timeout=2):
     connect_mysql(mysql_server,mysql_query,[row_limit],timeout)
 
 def dgps_correction(mysql_server,rtc,raw_gps,timeout=2):
-    if rtc: mysql_query = ("SELECT diff_lat, diff_lon, num_sats, hdop, lat, lon FROM {} WHERE RTC = '{}' ORDER BY id DESC LIMIT 1".format(mysql_server["table"],rtc))
-    else: mysql_query = ("SELECT diff_lat, diff_lon, num_sats, hdop, lat, lon FROM {} ORDER BY id DESC LIMIT 1".format(mysql_server["table"]))
-    # Read the previous timestamps from database
-    i = 1
-    while True:
-        base_station = connect_mysql(mysql_server,mysql_query,timeout=timeout)
-        if base_station:
-            # Change the format into suitable timedate objects
-            for data in base_station:
-                new_latitude = round(raw_gps.Latitude + data[0],7)
-                new_longitude = round(raw_gps.Longitude + data[1],7)
-                diff_sats = raw_gps.Count_Satellites - data[2]
-                diff_hdop = round(raw_gps.HDOP - data[3],2)
-                ref_raw_lat = round(data[4],7)
-                ref_raw_lon = round(data[5],7)
-            break
-        else:
-            print(" -- no RTC data, retrying -- ")
-            if i == 3: break
+    try:
+        if rtc: mysql_query = ("SELECT diff_lat, diff_lon, num_sats, hdop, lat, lon FROM {} WHERE RTC = '{}' ORDER BY id DESC LIMIT 1".format(mysql_server["table"],rtc))
+        else: mysql_query = ("SELECT diff_lat, diff_lon, num_sats, hdop, lat, lon FROM {} ORDER BY id DESC LIMIT 1".format(mysql_server["table"]))
+        # Read the previous timestamps from database
+        i = 1
+        while True:
+            base_station = connect_mysql(mysql_server,mysql_query,timeout=timeout)
+            if base_station:
+                # Change the format into suitable timedate objects
+                for data in base_station:
+                    new_latitude = round(raw_gps.Latitude + data[0],7)
+                    new_longitude = round(raw_gps.Longitude + data[1],7)
+                    diff_sats = raw_gps.Count_Satellites - data[2]
+                    diff_hdop = round(raw_gps.HDOP - data[3],2)
+                    ref_raw_lat = round(data[4],7)
+                    ref_raw_lon = round(data[5],7)
+                break
             else:
-                time.sleep(1)
-                i+=1
-    if base_station: return [new_latitude, new_longitude, diff_sats, diff_hdop, ref_raw_lat, ref_raw_lon]
-    else:
-        print(" << skipping RTC data >> ")
-        return ["","","","","",""]
+                print(" -- no RTC data, retrying -- ")
+                if i == 3: break
+                else:
+                    time.sleep(1)
+                    i+=1
+        if base_station: return [new_latitude, new_longitude, diff_sats, diff_hdop, ref_raw_lat, ref_raw_lon]
+        else:
+            print(" << skipping RTC data >> ")
+            print("")
+            return ["","","","","",""]
+    except: return ["","","","","",""]
 
 #################################################################################################################
 
