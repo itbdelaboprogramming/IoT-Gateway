@@ -24,7 +24,15 @@ log_limit = 31
 
 #################################################################################################################
 
-def dgps_correction(mysql_server,mysql_query,raw_gps,timeout=2):
+def limit_db_rows(mysql_server,row_limit,timeout=2):
+    mysql_query = ("DELETE FROM {} WHERE id NOT IN ( SELECT id FROM ( "
+                       "SELECT id FROM {} ORDER BY id DESC LIMIT %s ) AS limited_rows )".format(
+                           mysql_server["table"],mysql_server["table"]))
+    connect_mysql(mysql_server,mysql_query,[row_limit],timeout)
+
+def dgps_correction(mysql_server,rtc,raw_gps,timeout=2):
+    if rtc: mysql_query = ("SELECT diff_lat, diff_lon, num_sats, hdop, lat, lon FROM {} WHERE RTC = '{}' ORDER BY id DESC LIMIT 1".format(mysql_server["table"],rtc))
+    else: mysql_query = ("SELECT diff_lat, diff_lon, num_sats, hdop, lat, lon FROM {} ORDER BY id DESC LIMIT 1".format(mysql_server["table"]))
     # Read the previous timestamps from database
     i = 1
     while True:

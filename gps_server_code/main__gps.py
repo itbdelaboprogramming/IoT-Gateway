@@ -30,6 +30,7 @@ mysql_timeout   = 3 # the maximum time this device will wait for completing MySQ
 mysql_interval = 60 # Seconds, used to maintain table row size
 interval = 1    # Seconds
 error_delay = 3 # Seconds
+db_row_limit = 50
 
 # Define SocketIO  parameters
 sio_server = "http://localhost:3000"
@@ -109,9 +110,6 @@ while not init:
     # Maintain table row size so that it is not too big
     if (timer - start).total_seconds() > mysql_interval:
         start = timer
-        limit_query = ("DELETE FROM {} WHERE id NOT IN ( SELECT id FROM ( "
-                       "SELECT id FROM {} ORDER BY id DESC LIMIT %s ) AS limited_rows )".format(
-                           mysql_server["table"],mysql_server["table"]))
-        query.connect_mysql(mysql_server,limit_query,[50],mysql_timeout)
+        query.limit_db_rows(mysql_server,db_row_limit,mysql_timeout)
 
     time.sleep(interval)

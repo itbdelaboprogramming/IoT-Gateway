@@ -18,10 +18,6 @@ import os
 import time
 import serial
 
-# Connect through serial communication to the SIM Card
-path = os.path.dirname(os.path.abspath(__file__))
-port = os.popen('bash {}/get_usb.bash'.format(path)).read().strip()
-sim = serial.Serial(port, baudrate=115200, timeout=3)
 
 # send AT command through serial communication, then read and print the response (expect)
 def send_at(command,expect,wait):
@@ -37,6 +33,11 @@ def send_at(command,expect,wait):
         print(rec_buff.decode())
 
 if sys.argv[1] == "SIM7600":
+    # Connect through serial communication to the SIM Card
+    path = os.path.dirname(os.path.abspath(__file__))
+    port = os.popen('bash {}/get_usb.bash'.format(path)).read().strip()
+    sim = serial.Serial(port, baudrate=115200, timeout=3)
+
     # Start GPS session
     send_at('AT+CGPS=1','OK',1)
 
@@ -51,5 +52,5 @@ if sys.argv[1] == "SIM7600":
 
     sim.close()
     
-elif sys.argv[1] == "SE100":
+else:
     pass

@@ -14,7 +14,6 @@
 # -*- coding:utf-8 -*-
 
 import serial
-import time
 import os
 import datetime
 import signal
@@ -34,34 +33,28 @@ class node:
         # Configure serial communication
         path = os.path.dirname(os.path.abspath(__file__))
         port = os.popen('bash {}/get_usb.bash'.format(path)).read().strip()
+        os.system('sudo chmod a+rw {}'.format(port))
         self._ser = serial.Serial(port,115200,timeout=3)
         self._ser.flushInput()
         print('Start GPS session...')
 
     def gps_decode(self,gps_data):
-        # Determine GPS' status
-        if gps_data.count('') < 3:
-            try:
-                # Calculate Latitude and Longitude
-                Lat = round(float(gps_data[4][:gps_data[4].index('.')-2])+(float(gps_data[4][gps_data[4].index('.')-2:])/60),7)
-                Long = round(float(gps_data[6][:gps_data[6].index('.')-2])+(float(gps_data[6][gps_data[6].index('.')-2:])/60),7)
-                if gps_data[5] == 'N': self.Latitude = Lat
-                else: self.Latitude = -Lat
-                if gps_data[7] == 'E': self.Longitude = Long
-                else: self.Longitude = -Long
+        # Calculate Latitude and Longitude
+        Lat = round(float(gps_data[4][:gps_data[4].index('.')-2])+(float(gps_data[4][gps_data[4].index('.')-2:])/60),7)
+        Long = round(float(gps_data[6][:gps_data[6].index('.')-2])+(float(gps_data[6][gps_data[6].index('.')-2:])/60),7)
+        if gps_data[5] == 'N': self.Latitude = Lat
+        else: self.Latitude = -Lat
+        if gps_data[7] == 'E': self.Longitude = Long
+        else: self.Longitude = -Long
 
-                # Decode the other data
-                Date = datetime.datetime.strptime(gps_data[8],'%d%m%y').date()
-                Time = datetime.datetime.strptime(gps_data[9][:-2],'%H%M%S').time()
-                self.RTC = datetime.datetime.combine(Date,Time)
-                self.Count_Satellites = int(gps_data[1])
-                self.HDOP = float(gps_data[13])
-                if self.HDOP > 1:
-                    self.Status = "Poor GPS Accuracy"
-                else: self.Status = "Good GPS Accuracy"
-            except:
-                self.Status = "Good GPS Accuracy"
-        else: self.Status = "GPS Signal Lost"
+        # Decode the other data
+        Date = datetime.datetime.strptime(gps_data[8],'%d%m%y').date()
+        Time = datetime.datetime.strptime(gps_data[9][:-2],'%H%M%S').time()
+        self.RTC = datetime.datetime.combine(Date,Time)
+        self.Count_Satellites = int(gps_data[1])
+        self.HDOP = float(gps_data[13])
+        if self.HDOP > 1: self.Status = "Poor GPS Accuracy"
+        else: self.Status = "Good GPS Accuracy"
 
     def handle_timeout(self, signum, frame):
         raise TimeoutError("-- no data on serial port --")
@@ -74,14 +67,18 @@ class node:
             # Read AT Command's responses
             while True:
                 line = self._ser.readline().decode()
-                if '+CGNSSINFO: ' in line:
+                if '+CGNSSINFO: ,,,,,' in line:
+                    # EXAMPLE LOST SIGNAL: '+CGNSSINFO: ,,,,,,,,,,,,,,,'
+                    self.Status = "GPS Signal Lost"
+                    break
+                elif '+CGNSSINFO: ' in line:
+                    # Parse the from NMEA format to object's attributes
                     data = line.replace('+CGNSSINFO: ',"").strip().split(',')
                     self.gps_decode(data)
                     break
-        except TimeoutError as e:
+        except:
             # Print the error message
             print("problem with GPS :")
-            print(e)
             print("<===== ===== continuing ===== =====>")
             print("")
             # Disconnected

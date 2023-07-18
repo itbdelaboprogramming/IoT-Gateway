@@ -15,5 +15,5 @@
       "morgan": "^1.10.0",
       "socket.io": "^4.7.1"
     },
-    "description": ""
+    "description": "GPS Dashboard Server"
 }

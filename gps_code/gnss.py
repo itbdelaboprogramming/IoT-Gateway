@@ -52,5 +52,5 @@ if sys.argv[1] == "SIM7600":
 
     sim.close()
     
-elif sys.argv[1] == "SE100":
+else:
     pass

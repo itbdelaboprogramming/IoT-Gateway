@@ -39,10 +39,94 @@ sudo pip3 install python-socketio
 sudo pip3 install websocket-client
 sudo pip3 install pymysql
 
-#start configuration
-echo "Available configuration: SE100, SIM7600"
-read -p "Input your GPS model --> " GPS
-sudo python3 /home/$(logname)/gps_code/gnss.py $GPS
+# Start GPS module configuration
+while true; do
+echo ""
+echo "The GPS module needs to be configured"
+echo "Available configuration:"
+echo "1) SIM7600"
+echo "2) SE100"
+echo "3) ~ others"
+echo ""
+read -p "Input the number --> " gps_model
+case $gps_model in
+[1]*)
+sudo python3 /home/$(logname)/gps_code/gnss.py SIM7600
+sudo > /home/$(logname)/gps_code/lib/get_usb.bash
+sudo cat <<endoffile >> /home/$(logname)/gps_code/lib/get_usb.bash
+#!/bin/bash
+# Find the line with specific USB name
+line=\$(ls -l /dev/serial/by-id | grep 'SimTech__Incorporated_SimTech__Incorporated_0123456789ABCDEF-if02')
+# Extract the device name from the line
+path=\$(echo "\$line" | awk '{print \$NF}')
+# Check if the device name was found
+if [ -n "\$path" ]; then
+filename=\$(basename "\$path")
+device_name="\${filename%.*}"
+echo "/dev/\$device_name"
+else
+echo ""
+fi
+endoffile
+break;;
+
+[2]*)
+while true; do
+echo ""
+echo "Choose the SE100 communication media"
+echo "Available configuration:"
+echo "1) UART (Tx-Rx) pinout"
+echo "2) USB-to-TTL"
+echo "3) ~ others"
+echo ""
+read -p "Input the number --> " se100_com
+case $se100_com in
+[1]*)
+sudo > /home/$(logname)/gps_code/lib/get_usb.bash
+sudo cat <<endoffile >> /home/$(logname)/gps_code/lib/get_usb.bash
+#!/bin/bash
+echo "/dev/ttyAMA0"
+endoffile
+break;;
+[2]*)
+sudo > /home/$(logname)/gps_code/lib/get_usb.bash
+sudo cat <<endoffile >> /home/$(logname)/gps_code/lib/get_usb.bash
+#!/bin/bash
+# Find the line with specific USB name
+line=\$(ls -l /dev/serial/by-id | grep 'usb-Prolific_Technology_Inc._USB-Serial_Controller')
+# Extract the device name from the line
+path=\$(echo "\$line" | awk '{print \$NF}')
+# Check if the device name was found
+if [ -n "\$path" ]; then
+filename=\$(basename "\$path")
+device_name="\${filename%.*}"
+echo "/dev/\$device_name"
+else
+echo ""
+fi
+endoffile
+break;;
+[3]*)
+echo ""
+echo "Please configure the GPS module by yourself"
+break;;
+*)
+echo ""
+echo "Invalid input. Please answer from the number on the list.";;
+esac
+done
+break;;
+
+[3]*)
+echo ""
+echo "Please configure the GPS module by yourself"
+break;;
+
+*)
+echo ""
+echo "Invalid input. Please answer from the number on the list.";;
+esac
+done
 
 echo ""
 echo "=========================================================="

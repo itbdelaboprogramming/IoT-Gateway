@@ -78,10 +78,8 @@ while not init:
     timer = datetime.datetime.now()
 
     # Calculate differential correction
-    latest_query = ("SELECT diff_lat, diff_lon, num_sats, hdop, lat, lon FROM {} ORDER BY id DESC LIMIT 1".format(mysql_server["table"]))
-    latest_data = query.dgps_correction(mysql_server,latest_query,gps)
-    rtc_query = ("SELECT diff_lat, diff_lon, num_sats, hdop, lat, lon FROM {} WHERE RTC = '{}' ORDER BY id DESC LIMIT 1".format(mysql_server["table"],gps.RTC.strftime("%H:%M:%S")))
-    rtc_data = query.dgps_correction(mysql_server,rtc_query,gps)
+    latest_data = query.dgps_correction(mysql_server, None, gps)
+    rtc_data = query.dgps_correction(mysql_server, gps.RTC.strftime("%H:%M:%S"), gps)
 
     # Save data to csv for analysis
     title = ["time","raw_lat","raw_lon","num_sats","hdop",
