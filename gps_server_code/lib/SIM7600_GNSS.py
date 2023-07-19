@@ -19,7 +19,7 @@ import datetime
 import signal
 
 class node:
-    def __init__(self,name):
+    def __init__(self,port,name):
         # Intialize variables
         self._name = name
         self.Latitude = None
@@ -31,8 +31,7 @@ class node:
         signal.signal(signal.SIGALRM, self.handle_timeout)
 
         # Configure serial communication
-        path = os.path.dirname(os.path.abspath(__file__))
-        port = os.popen('bash {}/get_usb.bash'.format(path)).read().strip()
+        #port = os.popen('bash {}/get_usb.bash'.format(os.path.dirname(os.path.abspath(__file__)))).read().strip()
         os.system('sudo chmod a+rw {}'.format(port))
         self._ser = serial.Serial(port,115200,timeout=3)
         self._ser.flushInput()

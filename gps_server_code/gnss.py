@@ -34,8 +34,8 @@ def send_at(command,expect,wait):
 
 if sys.argv[1] == "SIM7600":
     # Connect through serial communication to the SIM Card
-    path = os.path.dirname(os.path.abspath(__file__))
-    port = os.popen('bash {}/get_usb.bash'.format(path)).read().strip()
+    port_id = 'SimTech__Incorporated_SimTech__Incorporated_0123456789ABCDEF-if02' # for SIM7600G-H module
+    port = os.popen('sudo bash {}/get_usb.bash {}'.format(os.path.dirname(os.path.abspath(__file__)), port_id)).read().strip()
     sim = serial.Serial(port, baudrate=115200, timeout=3)
 
     # Start GPS session

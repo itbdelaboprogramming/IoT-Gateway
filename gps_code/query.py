@@ -1,10 +1,10 @@
 """
 #title           :query.py
-#description     :custom functions for PyModbus ans PyMySQL, used through main__modbus.py file
+#description     :custom functions for PyMySQL ant others
 #author          :Nicholas Putra Rihandoko
-#date            :2023/05/12
+#date            :2023/07/19
 #version         :0.1
-#usage           :Modbus programming in Python
+#usage           :Python programming
 #notes           :
 #python_version  :3.7.3
 #==============================================================================
