@@ -36,8 +36,10 @@ mysql_server    = {"host":"10.4.171.204",
 mysql_timeout   = 3 # the maximum time this device will wait for completing MySQl query (in seconds)
 interval        = 1 # the period between each subsequent communication routine/loop (in seconds)
 
+# NIW REF = 33.2108277, 130.0459166
+# ITB REF = -6.889777, 107.608666
 # Define SocketIO  parameters
-sio_server = "http://10.4.171.198:3000"
+sio_server = "http://10.4.171.54:3000"
 sio_payload = {"id": 0,
                 "data": {
                     "latitude": None,
@@ -100,12 +102,13 @@ while not init:
             
         # Send to the Socket.IO server
         try:
-            sio_payload["data"]["latitude"] = gps.Latitude
-            sio_payload["data"]["longitude"] = gps.Longitude
-            sio_payload["data"]["status"] = gps.Status
+            #sio_payload["data"]["latitude"] = gps.Latitude
+            #sio_payload["data"]["longitude"] = gps.Longitude
+            #sio_payload["data"]["status"] = gps.Status
             #sio.emit("gps",json.dumps(sio_payload))
 
             # NIW REF = 33.2108277, 130.0459166
+            # ITB REF = -6.889777, 107.608666
             gpsloc = {"latitude" : latest_data[0], "longitude" : latest_data[1]}
             gpshead = {"heading" : 300}
             sio.emit("location",json.dumps(gpsloc))

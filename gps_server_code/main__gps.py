@@ -38,6 +38,8 @@ mysql_interval  = 60 # the period between each subsequent update to database (in
 db_row_limit    = 50 # the maximum rows in database
 interval        = 1 # the period between each subsequent communication routine/loop (in seconds)
 
+# NIW REF = 33.2108277, 130.0459166
+# ITB REF = -6.889777, 107.608666
 # Define SocketIO  parameters
 sio_server = "http://localhost:3000"
 sio_payload = {"id": 0,
@@ -98,12 +100,13 @@ while not init:
 
         # Send to the Socket.IO server
         try:
-            sio_payload["data"]["latitude"] = gps.Latitude
-            sio_payload["data"]["longitude"] = gps.Longitude
-            sio_payload["data"]["status"] = gps.Status
+            #sio_payload["data"]["latitude"] = gps.Latitude
+            #sio_payload["data"]["longitude"] = gps.Longitude
+            #sio_payload["data"]["status"] = gps.Status
             #sio.emit("gps",json.dumps(sio_payload))
 
             # NIW REF = 33.2108277, 130.0459166
+            # ITB REF = -6.889777, 107.608666
             gpsloc = {"latitude" : gps.Latitude, "longitude" : gps.Longitude}
             gpshead = {"heading" : 300}
             #sio.emit("location",json.dumps(gpsloc))
