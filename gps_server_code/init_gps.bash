@@ -75,13 +75,13 @@ case $gps_model in
 [1]*)
 sudo python3 /home/$(logname)/gps_server_code/gnss.py SIM7600
 echo ""
-echo "Use 'from lib import SIM7600_GNSS' in the main__gps.py script"
-echo "Also make sure to choose the correct port_id in the main__gps.py script"
+echo "In the main__gps.py script, use 'from lib import SIM7600_GNSS'"
+echo "Also make sure to choose the correct 'port_id' variable"
 break;;
 [2]*)
 echo ""
-echo "Use 'from lib import SE100_GNSS' in the main__gps.py script"
-echo "Also make sure to choose the correct port_id in the main__gps.py script"
+echo "In the main__gps.py script, use 'from lib import SE100_GNSS'"
+echo "Also make sure to choose the correct 'port_id' variable"
 break;;
 [3]*)
 echo ""
