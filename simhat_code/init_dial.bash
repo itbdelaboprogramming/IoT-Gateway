@@ -13,6 +13,35 @@ echo "Starting SIM Hat System installation..."
 echo ""
 echo "Press 'ctrl + C' to cancel"
 
+# Enable execute (run program) privilege for all related files
+sudo chmod +x /home/$(logname)/simhat_code/dial.bash
+sudo chmod +x /home/$(logname)/simhat_code/dial.py
+sudo chmod +x /home/$(logname)/simhat_code/route.bash
+
+# Write RaspberyPi's username-dependent command in dial.bash
+sudo > /home/$(logname)/simhat_code/dial.bash
+sudo cat <<endoffile >> /home/$(logname)/simhat_code/dial.bash
+#!/bin/bash
+echo ""
+date +"%Y-%m-%d %H:%M:%S"
+echo ""
+# Ping the Google DNS server to check internet connectivity
+if ! sudo ping -q -c 1 -W 1 8.8.8.8 >/dev/null; then
+echo "NO INTERNET"
+# Run internet dial sequence
+sudo python3 /home/$(logname)/simhat_code/dial.py lease
+fi
+exit 0
+endoffile
+
+# Create cron command to check connection every 2 minutes, stars dial.bash if there is no internet
+line='*/2 * * * * root sudo bash /home/$(logname)/simhat_code/dial.bash >> /home/$(logname)/simhat_code/dial.log 2>&1'
+# Check whether the command line already exists in /etc/crontab, add or uncomment it if it does not
+sudo su -c "sed -i '/.*simhat_code.*/d' /etc/crontab"
+sudo su -c "echo \"$line\" >> /etc/crontab"
+# Restart cron service
+sudo service cron restart
+
 while true; do
 echo ""
 read -p "Will this machine act as a Router? (Y/n) " yn_router
@@ -43,36 +72,6 @@ echo ""
 echo "Invalid input. Please answer 'y' or 'n'.";;
 esac
 done
-
-# Enable execute (run program) privilege for all related files
-sudo chmod +x /home/$(logname)/simhat_code/dial.bash
-sudo chmod +x /home/$(logname)/simhat_code/dial.py
-sudo chmod +x /home/$(logname)/simhat_code/route.bash
-sudo chmod +x /etc/crontab
-
-# Write RaspberyPi's username-dependent command in dial.bash
-sudo > /home/$(logname)/simhat_code/dial.bash
-sudo cat <<endoffile >> /home/$(logname)/simhat_code/dial.bash
-#!/bin/bash
-echo ""
-date +"%Y-%m-%d %H:%M:%S"
-echo ""
-# Ping the Google DNS server to check internet connectivity
-if ! sudo ping -q -c 1 -W 1 8.8.8.8 >/dev/null; then
-echo "NO INTERNET"
-# Run internet dial sequence
-sudo python3 /home/$(logname)/simhat_code/dial.py lease
-fi
-exit 0
-endoffile
-
-# Create cron command to check connection every 2 minutes, stars dial.bash if there is no internet
-line='*/2 * * * * root sudo bash /home/$(logname)/simhat_code/dial.bash >> /home/$(logname)/simhat_code/dial.log 2>&1'
-# Check whether the command line already exists in /etc/crontab, add or uncomment it if it does not
-sudo su -c "sed -i '/.*simhat_code.*/d' /etc/crontab"
-sudo su -c "echo \"$line\" >> /etc/crontab"
-# Restart cron service
-sudo service cron restart
 
 # --------- this is the start of SIM Card config IF CONDITIONAL ($yn_sim)
 if [[ "$yn_sim" == "y" || "$yn_sim" == "Y" ]]; then
@@ -105,6 +104,7 @@ curl -s https://install.zerotier.com | sudo bash
 # cron for task automation
 sudo apt install cron -y
 sudo systemctl enable cron
+sudo chmod +x /etc/crontab
 # ssh and VNC for remote access
 sudo systemctl enable ssh
 sudo systemctl start ssh
