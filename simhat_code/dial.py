@@ -59,10 +59,10 @@ else:
     os.system('sudo su -c "rmmod qmi_wwan && rmmod simcom_wwan && rmmod simcom_wwan.ko &> /dev/null"')
     
     # Run make files to compile SIM Hat driver
-    os.system('sudo su -c "cd {}/SIM7600_NDIS && make clean && make &> /dev/null"'.format(path))
+    os.system('sudo su -c "cd {}/SIM7600_NDIS && make clean && make &> /dev/null"'.format(os.path.dirname(os.path.abspath(__file__))))
     
     # Install the Simcom SIM card driver (it will be automatically removed during every reboot)
-    os.system('sudo su -c "cd {}/SIM7600_NDIS && insmod simcom_wwan.ko &> /dev/null"'.format(path))
+    os.system('sudo su -c "cd {}/SIM7600_NDIS && insmod simcom_wwan.ko &> /dev/null"'.format(os.path.dirname(os.path.abspath(__file__))))
     
     # Enable mobile data connection interface
     os.system('sudo ifconfig wwan0 up && sudo ip link set up wwan0')
