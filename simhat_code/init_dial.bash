@@ -20,13 +20,9 @@ case $yn_router in
 [Yy]*)
 while true; do
 echo ""
-read -p "Do you want to configure the SIM card first? (Y/n): " yn_skip
-case $yn_skip in
-[Yy]*)
-echo ""
-echo "OK"
-break;;
-[Nn]*)
+read -p "Do you want to configure the SIM card first? (Y/n): " yn_sim
+case $yn_sim in
+[YyNn]*)
 echo ""
 echo "OK"
 break;;
@@ -40,7 +36,7 @@ break;;
 [Nn]*)
 echo ""
 echo "OK"
-yn_skip="n"
+yn_sim="y"
 break;;
 *)
 echo ""
@@ -78,8 +74,8 @@ sudo su -c "echo \"$line\" >> /etc/crontab"
 # Restart cron service
 sudo service cron restart
 
-# --------- this is the start of SIM Card config IF CONDITIONAL
-if [[ "$yn_skip" == "y" || "$yn_skip" == "Y" ]]; then
+# --------- this is the start of SIM Card config IF CONDITIONAL ($yn_sim)
+if [[ "$yn_sim" == "y" || "$yn_sim" == "Y" ]]; then
 echo "Continuing with SIM Card configuration..."
 echo ""
 echo "Please input the SIM card's APN information"
@@ -196,7 +192,7 @@ echo ""
 exit 0
 fi
 
-fi # --------- this is the end of SIM Card config IF CONDITIONAL
+fi # --------- this is the end of SIM Card config IF CONDITIONAL ($yn_sim)
 
 #=================================================
 # RASPBERRY PI AS ROUTER
