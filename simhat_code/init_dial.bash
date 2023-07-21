@@ -34,14 +34,6 @@ fi
 exit 0
 endoffile
 
-# Create cron command to check connection every 2 minutes, stars dial.bash if there is no internet
-line='*/2 * * * * root sudo bash /home/$(logname)/simhat_code/dial.bash >> /home/$(logname)/simhat_code/dial.log 2>&1'
-# Check whether the command line already exists in /etc/crontab, add or uncomment it if it does not
-sudo su -c "sed -i '/.*simhat_code.*/d' /etc/crontab"
-sudo su -c "echo \"$line\" >> /etc/crontab"
-# Restart cron service
-sudo service cron restart
-
 while true; do
 echo ""
 read -p "Will this machine act as a Router? (Y/n) " yn_router
@@ -276,6 +268,14 @@ break;;
 echo "Invalid input. Please answer 'y' or 'n'.";;
 esac
 done
+
+# Create cron command to check connection every 2 minutes, stars dial.bash if there is no internet
+line='*/2 * * * * root sudo bash /home/$(logname)/simhat_code/dial.bash >> /home/$(logname)/simhat_code/dial.log 2>&1'
+# Check whether the command line already exists in /etc/crontab, add or uncomment it if it does not
+sudo su -c "sed -i '/.*simhat_code.*/d' /etc/crontab"
+sudo su -c "echo \"$line\" >> /etc/crontab"
+# Restart cron service
+sudo service cron restart
 
 echo ""
 echo "This machine's ZeroTier address is $(echo "$(sudo zerotier-cli info)" | awk '{print $3}')"
