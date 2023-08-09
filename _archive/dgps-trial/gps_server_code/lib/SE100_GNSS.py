@@ -31,6 +31,7 @@ class node:
         signal.signal(signal.SIGALRM, self.handle_timeout)
 
         # Configure serial communication
+        #port = os.popen('bash {}/get_usb.bash'.format(os.path.dirname(os.path.abspath(__file__)))).read().strip()
         os.system('sudo chmod a+rw {}'.format(port))
         self._ser = serial.Serial(port,9600,timeout=3)
         self._ser.flushInput()

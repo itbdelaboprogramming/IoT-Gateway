@@ -1,6 +1,6 @@
 #!/bin/bash
 #title           :init_gps.bash
-#description     :the installation script for vehicle tracking using SocketIO and SIM HAT Nodule
+#description     :GPS module for vehicle tracking using SocketIO and SIM HAT Nodule
 #author          :Nicholas Putra Rihandoko
 #date            :2023/06/21
 #version         :2.1
@@ -34,8 +34,8 @@ sudo raspi-config nonint do_vnc 0
 
 # Enable execute (run program) privilege for all related files
 sudo chmod +x /home/$(logname)/gps_code/main__gps.py
-sudo chmod +x /home/$(logname)/gps_code/gnss_config.py
-sudo chmod +x /home/$(logname)/gps_code/dashboard_server/server.js
+sudo chmod +x /home/$(logname)/gps_code/gnss.py
+sudo chmod 777 /home/$(logname)/gps_code/save/gps_log.csv
 
 # Install pip for python library manager
 sudo apt update
@@ -54,11 +54,6 @@ sudo systemctl enable cron
 # Start GPS module configuration
 while true; do
 echo ""
-read -p "Will this device act as GPS transciever? (Y/n) " yn_gps
-case $yn_gps in
-[Yy]*)
-while true; do
-echo ""
 echo "The GPS module needs to be configured"
 echo "Available configuration:"
 echo "1) SIM7600"
@@ -68,7 +63,7 @@ echo ""
 read -p "Input the number --> " gps_model
 case $gps_model in
 [1]*)
-sudo python3 /home/$(logname)/gps_code/gnss_config.py SIM7600
+sudo python3 /home/$(logname)/gps_code/gnss.py SIM7600
 echo ""
 echo "In the main__gps.py script, use 'from lib import SIM7600_GNSS'"
 echo "Also make sure to choose the correct 'port_id' variable"
@@ -85,42 +80,6 @@ break;;
 *)
 echo ""
 echo "Invalid input. Please answer from the number on the list.";;
-esac
-done
-break;;
-[Nn]*)
-echo "OK"
-break;;
-*)
-echo ""
-echo "Invalid input.Try again.";;
-esac
-done
-
-# Start GPS Dashboard configuration
-while true; do
-echo ""
-read -p "Will this device act as dashboard server? (Y/n) " yn_dashboard
-case $yn_dashboard in
-[Yy]*)
-# Install Node js, Express js, ans socket.io
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | sudo bash
-source ~/.bashrc
-nvm install 12.22.12
-nvm alias default 12.22.12
-sudo apt install npm -y
-cd gps_code/dashboard_server
-npm init -y
-npm i socket.io@4.7.1 express@4.18.2 morgan@1.10.0 dotenv@16.3.1
-npm audit fix
-npm update engine.io ws
-break;;
-[Nn]*)
-echo "OK"
-break;;
-*)
-echo ""
-echo "Invalid input. Try again.";;
 esac
 done
 

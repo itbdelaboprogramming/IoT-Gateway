@@ -16,7 +16,7 @@ line=$(ls -l /dev/serial/by-id | grep "$id")
 # Extract the 'ttyUSB*' part from the line
 path=$(echo "$line" | awk '{print $NF}')
 
-# Check if the device name was found and add root privilege
+# Check if the device name was found
 if [ -n "$path" ]; then
 filename=$(basename "$path")
 device_name="${filename%.*}"
