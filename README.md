@@ -1,4 +1,6 @@
 # IoT-Gateway
+**NOTICE**: The completed version of IoT-Gateway has been continued to new repository, [IoT-Simhat](https://github.com/itbdelaboprogramming/IoT-Simhat). 
+
 Development of IoT gateway system for internet communication by using Raspberry-Pi.
 
 The Raspberry-Pi can also be used as a router (internet gateway) for other device that is connected through the ethernet port.
